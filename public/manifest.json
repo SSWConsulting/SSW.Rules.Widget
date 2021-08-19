@@ -1,0 +1,15 @@
+{
+  "short_name": "SSW",
+  "name": "SSW Rules Widget",
+  "icons": [
+    {
+      "src": "4-squares.svg",
+      "sizes": "512x512 192x192 128x128 64x64 32x32 24x24 16x16",
+      "type": "image/svg"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
