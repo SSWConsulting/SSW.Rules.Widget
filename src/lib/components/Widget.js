@@ -33,7 +33,7 @@ class Widget extends React.Component {
     const pullRequests = await fetch("https://api.github.com/graphql", {
       method: "POST",
       headers: {
-        Authorization: "bearer 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",
+        Authorization: "bearer /* INSERT TOKEN */",
       },
       body: JSON.stringify({
         query: `{
@@ -72,7 +72,7 @@ class Widget extends React.Component {
         fetch("https://api.github.com/graphql", {
           method: "POST",
           headers: {
-            Authorization: "bearer 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",
+            Authorization: "bearer /* INSERT TOKEN */",
           },
           body: JSON.stringify({
             query: `{
