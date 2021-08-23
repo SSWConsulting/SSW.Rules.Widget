@@ -257,6 +257,7 @@ Widget.propTypes = {
   author: PropTypes.string,
   isDarkMode: PropTypes.bool,
   numberOfRules: PropTypes.number.isRequired,
+  token: PropTypes.string.isRequired
 };
 
 export default Widget;
