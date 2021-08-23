@@ -33,7 +33,7 @@ class Widget extends React.Component {
     const pullRequests = await fetch("https://api.github.com/graphql", {
       method: "POST",
       headers: {
-        Authorization: "bearer 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",
+        Authorization: "bearer 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",
       },
       body: JSON.stringify({
         query: `{
@@ -60,6 +60,7 @@ class Widget extends React.Component {
       }`,
       }),
     }).then((res) => res.json());
+    pullRequests.data.search.nodes.sort((a,b) => new Date(b.mergedAt) - new Date(a.mergedAt))
     return pullRequests;
   }
 
@@ -71,7 +72,7 @@ class Widget extends React.Component {
         fetch("https://api.github.com/graphql", {
           method: "POST",
           headers: {
-            Authorization: "bearer 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",
+            Authorization: "bearer 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",
           },
           body: JSON.stringify({
             query: `{
