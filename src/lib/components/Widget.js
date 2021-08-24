@@ -7,6 +7,11 @@ import Logo from "./assets/SSWLogo.png";
 import "./styles/style.css";
 
 class Widget extends React.Component {
+  // URLs
+  sswUrl = "https://www.ssw.com.au";
+  sswRulesUrl = "https://www.ssw.com.au/rules";
+  apiBaseUrl = "https://api.github.com/graphql";
+
   constructor(props) {
     super(props);
     this.state = {
@@ -17,6 +22,15 @@ class Widget extends React.Component {
       author: props.author,
       numberOfRules: props.numberOfRules ? props.numberOfRules : 10,
     };
+  }
+  
+  determineTheme() {
+    if (this.state.isDarkMode === undefined) {
+      let browserDarkMode = window.matchMedia("(prefers-color-scheme: dark)");
+      this.setState({
+        isDarkMode: browserDarkMode ? true : false,
+      });
+    }
   }
 
   capitalizeFirstLetter(string) {
@@ -29,132 +43,31 @@ class Widget extends React.Component {
     return value.trim();
   }
 
-  async fetchPullRequests() {
-    const pullRequests = await fetch("https://api.github.com/graphql", {
-      method: "POST",
-      headers: {
-        Authorization: "bearer /* INSERT TOKEN */",
-      },
-      body: JSON.stringify({
-        query: `{
-        rateLimit {
-          remaining
-        }
-        search(query: "repo:SSWConsulting/SSW.Rules.Content is:pr base:main is:merged sort:updated-desc ${
-          this.state.author ? "author:" + this.state.author : ""
-        }", type: ISSUE, first: ${this.state.numberOfRules + 10}) {
-          nodes {
-            ... on PullRequest {
-              author {
-                login
-              }
-              files(first: 10) {
-                nodes {
-                  path
-                }
-              }
-              mergedAt
-            }
-          }
-        }
-      }`,
-      }),
-    }).then((res) => res.json());
-    pullRequests.data.search.nodes.sort((a,b) => new Date(b.mergedAt) - new Date(a.mergedAt))
-    return pullRequests;
-  }
-
-  async fetchFileContents(list) {
-    var returnList = [];
-    var promises = [];
-    for (var i = 0; i < this.state.numberOfRules; i++) {
-      promises.push(
-        fetch("https://api.github.com/graphql", {
-          method: "POST",
-          headers: {
-            Authorization: "bearer /* INSERT TOKEN */",
-          },
-          body: JSON.stringify({
-            query: `{
-          rateLimit {
-            remaining
-          }
-          repository(name: "SSW.Rules.Content", owner: "SSWConsulting") {
-            object(expression: "main:${list[i]}") {
-              ... on Blob {
-                text
-              }
-            }
-          }
-        }`,
-          }),
-        })
-      );
-    }
-    await Promise.all(promises)
-      .then((values) => Promise.all(values.map((res) => res.json())))
-      .then((values) =>
-        values.forEach((obj) => {
-          if (obj.data.repository.object != null) {
-            returnList = [...returnList, obj.data.repository.object.text];
-          } else {
-            returnList = [...returnList, null];
-          }
-        })
-      );
-    if (
-      returnList.filter((x) => x !== null).length < this.state.numberOfRules
-    ) {
-      var counter = 0;
-      while (
-        returnList.filter((x) => x !== null).length < this.state.numberOfRules
-      ) {
-        var response = await fetch("https://api.github.com/graphql", {
-          method: "POST",
-          headers: {
-            Authorization: "bearer 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",
-          },
-          body: JSON.stringify({
-            query: `{
-            rateLimit {
-              remaining
-            }
-            repository(name: "SSW.Rules.Content", owner: "SSWConsulting") {
-              object(expression: "main:${
-                list[counter + this.state.numberOfRules]
-              }") {
-                ... on Blob {
-                  text
-                }
-              }
-            }
-          }`,
-          }),
-        }).then((res) => res.json());
-        if (response.data.repository.object != null) {
-          returnList = [...returnList, response.data.repository.object.text];
-        } else {
-          returnList = [...returnList, null];
-        }
-        counter++;
-      }
-    }
-    return returnList;
-  }
-
-  async componentDidMount() {
-    this.determineTheme();
+  async setRules() {
+    // get latest pull requests
     const pullRequests = await this.fetchPullRequests();
-    var retrievalList = [];
+
+    // list of files to retrieve the contents of
+    var retrievalList = []; 
+
+    // list of PR details relating to files
     var rulesList = [];
-    for (let pr of pullRequests.data.search.nodes) {
+
+    // each file in each pull request
+    for (let pr of pullRequests) {
       for (let file of pr.files.nodes) {
+
+        // check if file is a rule and is not already in list
         if (
           !retrievalList.includes(file.path) &&
           file.path.substring(file.path.length - 3) === ".md" &&
           file.path.substring(0, 6) === "rules/"
         ) {
+
+          // add path to list
           retrievalList = [...retrievalList, file.path];
+
+          // add related details to list
           rulesList = [
             ...rulesList,
             {
@@ -165,11 +78,16 @@ class Widget extends React.Component {
         }
       }
     }
-    var files = await this.fetchFileContents(retrievalList);
-    for (let [i, file] of files.entries()) {
+
+    // get file contents of our list
+    var fileContents = await this.fetchFileContents(retrievalList);
+    for (let [i, file] of fileContents.entries()) {
       if (file != null) {
+
+        // get details from file contents
         var title = this.extractFromRuleContent("title", file);
         var uri = this.extractFromRuleContent("uri", file);
+
         this.setState({
           isLoaded: true,
           rules: [
@@ -188,29 +106,56 @@ class Widget extends React.Component {
     }
   }
 
-  determineTheme() {
-    if (this.state.isDarkMode === undefined) {
-      let browserDarkMode = window.matchMedia("(prefers-color-scheme: dark)");
-      this.setState({
-        isDarkMode: browserDarkMode ? true : false,
-      });
-    }
+  async fetchPullRequests() {
+    const pullRequests = await this.requestPullRequests();
+    pullRequests.sort((a, b) => new Date(b.mergedAt) - new Date(a.mergedAt));
+    return pullRequests;
   }
+
+  async fetchFileContents(list) {
+    // get initial list of file contents
+    var returnList = await this.requestMultipleFileContents(list);
+
+    // check if we got enough results
+    if (
+      returnList.filter((x) => x !== null).length < this.state.numberOfRules
+    ) {
+      var counter = 0;
+
+      // loop until we have enough results
+      while (
+        returnList.filter((x) => x !== null).length < this.state.numberOfRules
+      ) {
+        // get an extra file's contents to fill gaps
+        var file = await this.requestSingleFileContents(list[counter + this.state.numberOfRules]);
+        if (file != null) {
+          returnList = [...returnList, file];
+        } else {
+          returnList = [...returnList, null];
+        }
+        counter++;
+      }
+    }
+    return returnList;
+  }
+
+  componentDidMount() {
+    this.determineTheme();
+    this.setRules();
+  }
+
+  
 
   render() {
     const { error, isLoaded, rules } = this.state;
     return (
       <div className="rules-widget-container">
         <div className="rules-widget-title">
-          <a href="https://www.ssw.com.au/ssw">
+          <a href={this.sswUrl}>
             <img src={Logo} alt="SSW Logo" height="60" width="130"></img>
           </a>
           <h1>
-            <a
-              rel="noreferrer"
-              target="_blank"
-              href="https://www.ssw.com.au/rules/"
-            >
+            <a rel="noreferrer" target="_blank" href={`${this.sswUrl}/rules`}>
               Latest Rules
             </a>
           </h1>
@@ -228,7 +173,7 @@ class Widget extends React.Component {
                     <a
                       rel="noreferrer"
                       target="_blank"
-                      href={`https://www.ssw.com.au/rules/${item.uri}`}
+                      href={`${this.sswUrl}/rules/${item.uri}`}
                     >
                       {item.title}
                     </a>
@@ -251,12 +196,117 @@ class Widget extends React.Component {
       </div>
     );
   }
+
+  // api request methods
+
+  // return array of pull requests
+  async requestPullRequests() {
+    var response = await fetch(this.apiBaseUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `bearer ${process.env.REACT_APP_GITHUB_PAT}`,
+      },
+      body: JSON.stringify({
+        query: `{
+          search(query: "repo:SSWConsulting/SSW.Rules.Content is:pr base:main is:merged sort:updated-desc ${
+            this.state.author ? "author:" + this.state.author : ""
+          }", type: ISSUE, first: ${this.state.numberOfRules + 10}) {
+            nodes {
+              ... on PullRequest {
+                author {
+                  login
+                }
+                files(first: 10) {
+                  nodes {
+                    path
+                  }
+                }
+                mergedAt
+              }
+            }
+          }
+        }`,
+      }),
+    }).then((res) => res.json())
+    .catch(error => this.setState({ error: error }));
+    
+    return response.data.search.nodes || null;
+  }
+
+  // return array of strings, each string is the contents of a file
+  async requestMultipleFileContents(list) {
+    var promises = [];
+    for (var i = 0; i < this.state.numberOfRules; i++) {
+      promises.push(
+        fetch(this.apiBaseUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `bearer ${process.env.REACT_APP_GITHUB_PAT}`,
+          },
+          body: JSON.stringify({
+            query: `{
+              repository(name: "SSW.Rules.Content", owner: "SSWConsulting") {
+                object(expression: "main:${list[i]}") {
+                  ... on Blob {
+                    text
+                  }
+                }
+              }
+            }`,
+          }),
+        })
+      );
+    }
+
+    var contents = [];
+    await Promise.all(promises)
+      .then((values) => Promise.all(values.map((res) => res.json())))
+      .then((values) =>
+        values.forEach((obj) => {
+          if (obj.data.repository.object != null) {
+            contents = [...contents, obj.data.repository.object.text];
+          } else {
+            contents = [...contents, null];
+          }
+        }))
+      .catch(error => this.setState({ error: error }));
+    
+    return contents || null;
+  }
+
+  // return contents of file
+  async requestSingleFileContents(file) {
+    var response = await fetch(this.apiBaseUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `bearer ${process.env.REACT_APP_GITHUB_PAT}`,
+      },
+      body: JSON.stringify({
+        query: `{
+        rateLimit {
+          remaining
+        }
+        repository(name: "SSW.Rules.Content", owner: "SSWConsulting") {
+          object(expression: "main:${file}") {
+            ... on Blob {
+              text
+            }
+          }
+        }
+      }`,
+      }),
+    }).then((res) => res.json())
+    .catch(error => this.setState({ error: error }));
+
+    return response.data.repository.object.text || null;
+  }
 }
 
 Widget.propTypes = {
   author: PropTypes.string,
   isDarkMode: PropTypes.bool,
   numberOfRules: PropTypes.number.isRequired,
+  token: PropTypes.string.isRequired
 };
 
 export default Widget;
