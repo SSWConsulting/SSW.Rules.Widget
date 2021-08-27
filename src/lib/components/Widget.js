@@ -22,7 +22,7 @@ class Widget extends React.Component {
       rules: [],
       isDarkMode: props.isDarkMode,
       author: props.author,
-      numberOfRules: props.numberOfRules ? props.numberOfRules : 10,
+      numberOfRules: props.numberOfRules > 0 ? props.numberOfRules : 10,
     };
   }
   
