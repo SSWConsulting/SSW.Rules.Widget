@@ -10,6 +10,8 @@ class Widget extends React.Component {
   // URLs
   sswUrl = "https://www.ssw.com.au";
   sswRulesUrl = "https://www.ssw.com.au/rules";
+  githubOwner = "SSWConsulting"
+  githubRepo = "SSW.Rules.Content"
   apiBaseUrl = "https://api.github.com/graphql";
 
   constructor(props) {
@@ -187,7 +189,7 @@ class Widget extends React.Component {
       },
       body: JSON.stringify({
         query: `{
-          search(query: "repo:SSWConsulting/SSW.Rules.Content is:pr base:main is:merged sort:updated-desc ${
+          search(query: "repo:${this.githubOwner}/${this.githubRepo} is:pr base:main is:merged sort:updated-desc ${
             this.state.author ? "author:" + this.state.author : ""
           }", type: ISSUE, first: ${this.state.numberOfRules + 10}) {
             nodes {
@@ -223,7 +225,7 @@ class Widget extends React.Component {
           },
           body: JSON.stringify({
             query: `{
-              repository(name: "SSW.Rules.Content", owner: "SSWConsulting") {
+              repository(name: ${this.githubOwner}, owner: ${this.githubRepo}) {
                 object(expression: "main:${list[i]}") {
                   ... on Blob {
                     text
@@ -263,7 +265,7 @@ class Widget extends React.Component {
         rateLimit {
           remaining
         }
-        repository(name: "SSW.Rules.Content", owner: "SSWConsulting") {
+        repository(name: ${this.githubOwner}, owner: ${this.githubRepo}) {
           object(expression: "main:${file}") {
             ... on Blob {
               text
