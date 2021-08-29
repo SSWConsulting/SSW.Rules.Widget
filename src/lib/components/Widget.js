@@ -10,6 +10,8 @@ class Widget extends React.Component {
   // URLs
   sswUrl = "https://www.ssw.com.au";
   sswRulesUrl = "https://www.ssw.com.au/rules";
+  githubOwner = "SSWConsulting";
+  githubRepo = "SSW.Rules.Content";
   apiBaseUrl = "https://api.github.com/graphql";
 
   constructor(props) {
@@ -20,12 +22,12 @@ class Widget extends React.Component {
       rules: [],
       isDarkMode: props.isDarkMode,
       author: props.author,
-      numberOfRules: props.numberOfRules ? props.numberOfRules : 10,
+      numberOfRules: props.numberOfRules > 0 ? props.numberOfRules : 10,
     };
   }
 
   determineTheme() {
-    if (this.state.isDarkMode === undefined) {
+    if (!this.state.isDarkMode) {
       let browserDarkMode = window.matchMedia("(prefers-color-scheme: dark)");
       this.setState({
         isDarkMode: browserDarkMode ? true : false,
@@ -33,8 +35,10 @@ class Widget extends React.Component {
     }
   }
 
-  capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  capitalizeFirstLetter(stringToCapitalize) {
+    return (
+      stringToCapitalize.charAt(0).toUpperCase() + stringToCapitalize.slice(1)
+    );
   }
 
   extractFromRuleContent(term, text) {
@@ -44,31 +48,23 @@ class Widget extends React.Component {
   }
 
   async setRules() {
-    // get latest pull requests
     const pullRequests = await this.fetchPullRequests();
 
-    // list of files to retrieve the contents of
-    var retrievalList = [];
+    var filesToRetrieve = [];
+    var additionalFileDetails = [];
 
-    // list of PR details relating to files
-    var rulesList = [];
-
-    // each file in each pull request
     for (let pr of pullRequests) {
       for (let file of pr.files.nodes) {
-        // check if file is a rule and is not already in list
         if (
-          !retrievalList.includes(file.path) &&
+          !filesToRetrieve.includes(file.path) &&
           (file.path.substring(file.path.length - 3) === ".md" ||
             file.path.substring(file.path.length - 9) === ".markdown") &&
           file.path.substring(0, 6) === "rules/"
         ) {
-          // add path to list
-          retrievalList = [...retrievalList, file.path];
+          filesToRetrieve = [...filesToRetrieve, file.path];
 
-          // add related details to list
-          rulesList = [
-            ...rulesList,
+          additionalFileDetails = [
+            ...additionalFileDetails,
             {
               author: pr.author.login,
               timestamp: new Date(pr.mergedAt),
@@ -78,11 +74,9 @@ class Widget extends React.Component {
       }
     }
 
-    // get file contents of our list
-    var fileContents = await this.fetchFileContents(retrievalList);
-    for (let [i, file] of fileContents.entries()) {
+    var retrievedFileContents = await this.fetchFileContents(filesToRetrieve);
+    for (let [i, file] of retrievedFileContents.entries()) {
       if (file != null) {
-        // get details from file contents
         var title = this.extractFromRuleContent("title", file);
         var uri = this.extractFromRuleContent("uri", file);
 
@@ -95,8 +89,8 @@ class Widget extends React.Component {
               uri: uri,
               path: file.path,
               title: title,
-              author: rulesList[i].author,
-              timestamp: rulesList[i].timestamp,
+              author: additionalFileDetails[i].author,
+              timestamp: additionalFileDetails[i].timestamp,
             },
           ],
         });
@@ -110,33 +104,25 @@ class Widget extends React.Component {
     return pullRequests;
   }
 
-  async fetchFileContents(list) {
-    // get initial list of file contents
-    var returnList = await this.requestMultipleFileContents(list);
+  async fetchFileContents(filesToRetrieve) {
+    var fileContents = await this.requestMultipleFileContents(filesToRetrieve);
 
-    // check if we got enough results
     if (
-      returnList.filter((x) => x !== null).length < this.state.numberOfRules
+      fileContents.filter((x) => x !== null).length < this.state.numberOfRules
     ) {
       var counter = 0;
 
-      // loop until we have enough results
       while (
-        returnList.filter((x) => x !== null).length < this.state.numberOfRules
+        fileContents.filter((x) => x !== null).length < this.state.numberOfRules
       ) {
-        // get an extra file's contents to fill gaps
-        var file = await this.requestSingleFileContents(
-          list[counter + this.state.numberOfRules]
+        var extraFile = await this.requestSingleFileContents(
+          filesToRetrieve[counter + this.state.numberOfRules]
         );
-        if (file != null) {
-          returnList = [...returnList, file];
-        } else {
-          returnList = [...returnList, null];
-        }
+        fileContents = [...fileContents, extraFile];
         counter++;
       }
     }
-    return returnList;
+    return fileContents;
   }
 
   componentDidMount() {
@@ -196,8 +182,6 @@ class Widget extends React.Component {
   }
 
   // api request methods
-
-  // return array of pull requests
   async requestPullRequests() {
     var response = await fetch(this.apiBaseUrl, {
       method: "POST",
@@ -206,9 +190,11 @@ class Widget extends React.Component {
       },
       body: JSON.stringify({
         query: `{
-          search(query: "repo:SSWConsulting/SSW.Rules.Content is:pr base:main is:merged sort:updated-desc ${
-            this.state.author ? "author:" + this.state.author : ""
-          }", type: ISSUE, first: ${this.state.numberOfRules + 10}) {
+          search(query: "repo:${this.githubOwner}/${
+          this.githubRepo
+        } is:pr base:main is:merged sort:updated-desc ${
+          this.state.author ? "author:" + this.state.author : ""
+        }", type: ISSUE, first: ${this.state.numberOfRules + 10}) {
             nodes {
               ... on PullRequest {
                 author {
@@ -232,7 +218,6 @@ class Widget extends React.Component {
     return response.data.search.nodes || null;
   }
 
-  // return array of strings, each string is the contents of a file
   async requestMultipleFileContents(list) {
     var promises = [];
     for (var i = 0; i < this.state.numberOfRules; i++) {
@@ -244,7 +229,7 @@ class Widget extends React.Component {
           },
           body: JSON.stringify({
             query: `{
-              repository(name: "SSW.Rules.Content", owner: "SSWConsulting") {
+              repository(name: ${this.githubOwner}, owner: ${this.githubRepo}) {
                 object(expression: "main:${list[i]}") {
                   ... on Blob {
                     text
@@ -274,7 +259,6 @@ class Widget extends React.Component {
     return contents || null;
   }
 
-  // return contents of file
   async requestSingleFileContents(file) {
     var response = await fetch(this.apiBaseUrl, {
       method: "POST",
@@ -286,7 +270,7 @@ class Widget extends React.Component {
         rateLimit {
           remaining
         }
-        repository(name: "SSW.Rules.Content", owner: "SSWConsulting") {
+        repository(name: ${this.githubOwner}, owner: ${this.githubRepo}) {
           object(expression: "main:${file}") {
             ... on Blob {
               text
