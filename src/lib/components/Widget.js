@@ -23,7 +23,7 @@ class Widget extends React.Component {
       numberOfRules: props.numberOfRules ? props.numberOfRules : 10,
     };
   }
-  
+
   determineTheme() {
     if (this.state.isDarkMode === undefined) {
       let browserDarkMode = window.matchMedia("(prefers-color-scheme: dark)");
@@ -48,7 +48,7 @@ class Widget extends React.Component {
     const pullRequests = await this.fetchPullRequests();
 
     // list of files to retrieve the contents of
-    var retrievalList = []; 
+    var retrievalList = [];
 
     // list of PR details relating to files
     var rulesList = [];
@@ -56,14 +56,13 @@ class Widget extends React.Component {
     // each file in each pull request
     for (let pr of pullRequests) {
       for (let file of pr.files.nodes) {
-
         // check if file is a rule and is not already in list
         if (
           !retrievalList.includes(file.path) &&
-          file.path.substring(file.path.length - 3) === ".md" &&
+          (file.path.substring(file.path.length - 3) === ".md" ||
+            file.path.substring(file.path.length - 9) === ".markdown") &&
           file.path.substring(0, 6) === "rules/"
         ) {
-
           // add path to list
           retrievalList = [...retrievalList, file.path];
 
@@ -83,7 +82,6 @@ class Widget extends React.Component {
     var fileContents = await this.fetchFileContents(retrievalList);
     for (let [i, file] of fileContents.entries()) {
       if (file != null) {
-
         // get details from file contents
         var title = this.extractFromRuleContent("title", file);
         var uri = this.extractFromRuleContent("uri", file);
@@ -127,7 +125,9 @@ class Widget extends React.Component {
         returnList.filter((x) => x !== null).length < this.state.numberOfRules
       ) {
         // get an extra file's contents to fill gaps
-        var file = await this.requestSingleFileContents(list[counter + this.state.numberOfRules]);
+        var file = await this.requestSingleFileContents(
+          list[counter + this.state.numberOfRules]
+        );
         if (file != null) {
           returnList = [...returnList, file];
         } else {
@@ -143,8 +143,6 @@ class Widget extends React.Component {
     this.determineTheme();
     this.setRules();
   }
-
-  
 
   render() {
     const { error, isLoaded, rules } = this.state;
@@ -227,9 +225,10 @@ class Widget extends React.Component {
           }
         }`,
       }),
-    }).then((res) => res.json())
-    .catch(error => this.setState({ error: error }));
-    
+    })
+      .then((res) => res.json())
+      .catch((error) => this.setState({ error: error }));
+
     return response.data.search.nodes || null;
   }
 
@@ -268,9 +267,10 @@ class Widget extends React.Component {
           } else {
             contents = [...contents, null];
           }
-        }))
-      .catch(error => this.setState({ error: error }));
-    
+        })
+      )
+      .catch((error) => this.setState({ error: error }));
+
     return contents || null;
   }
 
@@ -295,8 +295,9 @@ class Widget extends React.Component {
         }
       }`,
       }),
-    }).then((res) => res.json())
-    .catch(error => this.setState({ error: error }));
+    })
+      .then((res) => res.json())
+      .catch((error) => this.setState({ error: error }));
 
     return response.data.repository.object.text || null;
   }
@@ -306,7 +307,7 @@ Widget.propTypes = {
   author: PropTypes.string,
   isDarkMode: PropTypes.bool,
   numberOfRules: PropTypes.number.isRequired,
-  token: PropTypes.string.isRequired
+  token: PropTypes.string.isRequired,
 };
 
 export default Widget;
