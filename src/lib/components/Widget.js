@@ -5,14 +5,15 @@ import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { formatDistanceStrict } from "date-fns";
 import Logo from "./assets/SSWLogo.png";
 import "./styles/style.css";
+import {
+  requestPullRequests,
+  requestSingleFileContents,
+  requestMultipleFileContents,
+} from "./api.js";
 
 class Widget extends React.Component {
-  // URLs
   sswUrl = "https://www.ssw.com.au";
   sswRulesUrl = "https://www.ssw.com.au/rules";
-  githubOwner = "SSWConsulting";
-  githubRepo = "SSW.Rules.Content";
-  apiBaseUrl = "https://api.github.com/graphql";
 
   constructor(props) {
     super(props);
@@ -23,6 +24,7 @@ class Widget extends React.Component {
       isDarkMode: props.isDarkMode,
       author: props.author,
       numberOfRules: props.numberOfRules > 0 ? props.numberOfRules : 10,
+      token: props.token,
     };
   }
 
@@ -99,13 +101,21 @@ class Widget extends React.Component {
   }
 
   async fetchPullRequests() {
-    const pullRequests = await this.requestPullRequests();
+    const pullRequests = await requestPullRequests(
+      this.state.numberOfRules,
+      this.state.author,
+      this.state.token
+    );
     pullRequests.sort((a, b) => new Date(b.mergedAt) - new Date(a.mergedAt));
     return pullRequests;
   }
 
   async fetchFileContents(filesToRetrieve) {
-    var fileContents = await this.requestMultipleFileContents(filesToRetrieve);
+    var fileContents = await requestMultipleFileContents(
+      filesToRetrieve,
+      this.state.numberOfRules,
+      this.state.token
+    );
 
     if (
       fileContents.filter((x) => x !== null).length < this.state.numberOfRules
@@ -115,8 +125,9 @@ class Widget extends React.Component {
       while (
         fileContents.filter((x) => x !== null).length < this.state.numberOfRules
       ) {
-        var extraFile = await this.requestSingleFileContents(
-          filesToRetrieve[counter + this.state.numberOfRules]
+        var extraFile = await requestSingleFileContents(
+          filesToRetrieve[counter + this.state.numberOfRules],
+          this.state.token
         );
         fileContents = [...fileContents, extraFile];
         counter++;
@@ -179,111 +190,6 @@ class Widget extends React.Component {
         </div>
       </div>
     );
-  }
-
-  // api request methods
-  async requestPullRequests() {
-    var response = await fetch(this.apiBaseUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `bearer ${process.env.REACT_APP_GITHUB_PAT}`,
-      },
-      body: JSON.stringify({
-        query: `{
-          search(query: "repo:${this.githubOwner}/${
-          this.githubRepo
-        } is:pr base:main is:merged sort:updated-desc ${
-          this.state.author ? "author:" + this.state.author : ""
-        }", type: ISSUE, first: ${this.state.numberOfRules + 10}) {
-            nodes {
-              ... on PullRequest {
-                author {
-                  login
-                }
-                files(first: 10) {
-                  nodes {
-                    path
-                  }
-                }
-                mergedAt
-              }
-            }
-          }
-        }`,
-      }),
-    })
-      .then((res) => res.json())
-      .catch((error) => this.setState({ error: error }));
-
-    return response.data.search.nodes || null;
-  }
-
-  async requestMultipleFileContents(list) {
-    var promises = [];
-    for (var i = 0; i < this.state.numberOfRules; i++) {
-      promises.push(
-        fetch(this.apiBaseUrl, {
-          method: "POST",
-          headers: {
-            Authorization: `bearer ${process.env.REACT_APP_GITHUB_PAT}`,
-          },
-          body: JSON.stringify({
-            query: `{
-              repository(name: ${this.githubOwner}, owner: ${this.githubRepo}) {
-                object(expression: "main:${list[i]}") {
-                  ... on Blob {
-                    text
-                  }
-                }
-              }
-            }`,
-          }),
-        })
-      );
-    }
-
-    var contents = [];
-    await Promise.all(promises)
-      .then((values) => Promise.all(values.map((res) => res.json())))
-      .then((values) =>
-        values.forEach((obj) => {
-          if (obj.data.repository.object != null) {
-            contents = [...contents, obj.data.repository.object.text];
-          } else {
-            contents = [...contents, null];
-          }
-        })
-      )
-      .catch((error) => this.setState({ error: error }));
-
-    return contents || null;
-  }
-
-  async requestSingleFileContents(file) {
-    var response = await fetch(this.apiBaseUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `bearer ${process.env.REACT_APP_GITHUB_PAT}`,
-      },
-      body: JSON.stringify({
-        query: `{
-        rateLimit {
-          remaining
-        }
-        repository(name: ${this.githubOwner}, owner: ${this.githubRepo}) {
-          object(expression: "main:${file}") {
-            ... on Blob {
-              text
-            }
-          }
-        }
-      }`,
-      }),
-    })
-      .then((res) => res.json())
-      .catch((error) => this.setState({ error: error }));
-
-    return response.data.repository.object.text || null;
   }
 }
 
