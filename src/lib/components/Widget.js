@@ -5,11 +5,7 @@ import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { formatDistanceStrict } from "date-fns";
 import Logo from "./assets/SSWLogo.png";
 import "./styles/style.css";
-import {
-  requestPullRequests,
-  requestSingleFileContents,
-  requestMultipleFileContents,
-} from "./api.js";
+import { fetchPullRequests, fetchFileContents, extractFromRuleContent } from "./api.js";
 
 class Widget extends React.Component {
   sswUrl = "https://www.ssw.com.au";
@@ -28,33 +24,12 @@ class Widget extends React.Component {
     };
   }
 
-  determineTheme() {
-    if (!this.state.isDarkMode) {
-      let browserDarkMode = window.matchMedia("(prefers-color-scheme: dark)");
-      this.setState({
-        isDarkMode: browserDarkMode ? true : false,
-      });
-    }
-  }
-
-  capitalizeFirstLetter(stringToCapitalize) {
-    return (
-      stringToCapitalize.charAt(0).toUpperCase() + stringToCapitalize.slice(1)
-    );
-  }
-
-  extractFromRuleContent(term, text) {
-    var start = text.substring(text.search(`${term}:`));
-    var value = start.substring(term.length + 1, start.search("\\n"));
-    return value.trim();
-  }
-
-  async setRules() {
-    const pullRequests = await this.fetchPullRequests();
-
+  async setRulesToDisplay() {
+    const pullRequests = await fetchPullRequests(this.state.numberOfRules, this.state.author, this.state.token);
+  
     var filesToRetrieve = [];
     var additionalFileDetails = [];
-
+  
     for (let pr of pullRequests) {
       for (let file of pr.files.nodes) {
         if (
@@ -64,7 +39,7 @@ class Widget extends React.Component {
           file.path.substring(0, 6) === "rules/"
         ) {
           filesToRetrieve = [...filesToRetrieve, file.path];
-
+  
           additionalFileDetails = [
             ...additionalFileDetails,
             {
@@ -75,13 +50,13 @@ class Widget extends React.Component {
         }
       }
     }
-
-    var retrievedFileContents = await this.fetchFileContents(filesToRetrieve);
+  
+    var retrievedFileContents = await fetchFileContents(filesToRetrieve, this.state.numberOfRules, this.state.token);
     for (let [i, file] of retrievedFileContents.entries()) {
       if (file != null) {
-        var title = this.extractFromRuleContent("title", file);
-        var uri = this.extractFromRuleContent("uri", file);
-
+        var title = extractFromRuleContent("title", file);
+        var uri = extractFromRuleContent("uri", file);
+  
         this.setState({
           isLoaded: true,
           rules: [
@@ -100,45 +75,24 @@ class Widget extends React.Component {
     }
   }
 
-  async fetchPullRequests() {
-    const pullRequests = await requestPullRequests(
-      this.state.numberOfRules,
-      this.state.author,
-      this.state.token
-    );
-    pullRequests.sort((a, b) => new Date(b.mergedAt) - new Date(a.mergedAt));
-    return pullRequests;
+  determineTheme() {
+    if (!this.state.isDarkMode) {
+      let browserDarkMode = window.matchMedia("(prefers-color-scheme: dark)");
+      this.setState({
+        isDarkMode: browserDarkMode ? true : false,
+      });
+    }
   }
 
-  async fetchFileContents(filesToRetrieve) {
-    var fileContents = await requestMultipleFileContents(
-      filesToRetrieve,
-      this.state.numberOfRules,
-      this.state.token
+  capitalizeFirstLetter(stringToCapitalize) {
+    return (
+      stringToCapitalize.charAt(0).toUpperCase() + stringToCapitalize.slice(1)
     );
-
-    if (
-      fileContents.filter((x) => x !== null).length < this.state.numberOfRules
-    ) {
-      var counter = 0;
-
-      while (
-        fileContents.filter((x) => x !== null).length < this.state.numberOfRules
-      ) {
-        var extraFile = await requestSingleFileContents(
-          filesToRetrieve[counter + this.state.numberOfRules],
-          this.state.token
-        );
-        fileContents = [...fileContents, extraFile];
-        counter++;
-      }
-    }
-    return fileContents;
   }
 
   componentDidMount() {
     this.determineTheme();
-    this.setRules();
+    this.setRulesToDisplay();
   }
 
   render() {

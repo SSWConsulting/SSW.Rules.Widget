@@ -10,9 +10,8 @@ export async function requestPullRequests(numberOfRules, author, token) {
     },
     body: JSON.stringify({
       query: `{
-			search(query: "repo:${githubOwner}/${githubRepo} is:pr base:main is:merged sort:updated-desc ${
-        author ? "author:" + author : ""
-      }", type: ISSUE, first: ${numberOfRules + 10}) {
+			search(query: "repo:${githubOwner}/${githubRepo} is:pr base:main is:merged sort:updated-desc ${author ? "author:" + author : ""
+        }", type: ISSUE, first: ${numberOfRules + 10}) {
 			nodes {
 				... on PullRequest {
 				author {
@@ -31,12 +30,12 @@ export async function requestPullRequests(numberOfRules, author, token) {
     }),
   })
     .then((res) => res.json())
-    .catch((error) => {return error});
+    .catch((error) => { return error });
 
   return response.data.search.nodes || null;
 }
 
-export async function requestMultipleFileContents(list, numberOfRules, token) {
+async function requestMultipleFileContents(list, numberOfRules, token) {
   var promises = [];
   for (var i = 0; i < numberOfRules; i++) {
     promises.push(
@@ -62,9 +61,9 @@ export async function requestMultipleFileContents(list, numberOfRules, token) {
 
   var contents = [];
   await Promise.all(promises)
-    .then((values) => Promise.all(values.map((res) => res.json())))
-    .then((values) =>
-      values.forEach((obj) => {
+    .then((returnedPromises) => Promise.all(returnedPromises.map((res) => res.json())))
+    .then((returnedObjects) =>
+      returnedObjects.forEach((obj) => {
         if (obj.data.repository.object != null) {
           contents = [...contents, obj.data.repository.object.text];
         } else {
@@ -72,12 +71,12 @@ export async function requestMultipleFileContents(list, numberOfRules, token) {
         }
       })
     )
-    .catch((error) => {return error});
+    .catch((error) => { return error });
 
   return contents || null;
 }
 
-export async function requestSingleFileContents(file, token) {
+async function requestSingleFileContents(file, token) {
   var response = await fetch(apiBaseUrl, {
     method: "POST",
     headers: {
@@ -99,7 +98,49 @@ export async function requestSingleFileContents(file, token) {
     }),
   })
     .then((res) => res.json())
-    .catch((error) => {return error});
+    .catch((error) => { return error });
 
   return response.data.repository.object.text || null;
+}
+
+export async function fetchPullRequests(numberOfRules, author, token) {
+  const pullRequests = await requestPullRequests(
+    numberOfRules,
+    author,
+    token
+  );
+  pullRequests.sort((a, b) => new Date(b.mergedAt) - new Date(a.mergedAt));
+  return pullRequests;
+}
+
+export async function fetchFileContents(filesToRetrieve, numberOfRules, token) {
+  var fileContents = await requestMultipleFileContents(
+    filesToRetrieve,
+    numberOfRules,
+    token
+  );
+
+  if (
+    fileContents.filter((x) => x !== null).length < numberOfRules
+  ) {
+    var counter = 0;
+
+    while (
+      fileContents.filter((x) => x !== null).length < numberOfRules
+    ) {
+      var extraFile = await requestSingleFileContents(
+        filesToRetrieve[counter + numberOfRules],
+        token
+      );
+      fileContents = [...fileContents, extraFile];
+      counter++;
+    }
+  }
+  return fileContents;
+}
+
+export function extractFromRuleContent(term, text) {
+  var start = text.substring(text.search(`${term}:`));
+  var value = start.substring(term.length + 1, start.search("\\n"));
+  return value.trim();
 }
