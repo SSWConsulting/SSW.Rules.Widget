@@ -39,7 +39,7 @@ export function setFilesToRetrieve(pullRequests) {
   for (let pr of pullRequests) {
     for (let file of pr.files.nodes) {
       if (
-        !filesToRetrieve.includes(file.path) &&
+        !filesToRetrieve.some(item => item.path === file.path) &&
         (file.path.substring(file.path.length - 3) === ".md" ||
           file.path.substring(file.path.length - 9) === ".markdown") &&
         file.path.substring(0, 6) === "rules/"
