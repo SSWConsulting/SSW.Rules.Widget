@@ -5,7 +5,7 @@ import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { formatDistanceStrict } from "date-fns";
 import Logo from "./assets/SSWLogo.png";
 import "./styles/style.css";
-import { fetchPullRequests, fetchFileContents, extractFromRuleContent } from "./api.js";
+import { fetchPullRequests, fetchFileContents, extractFromRuleContent, setFilesToRetrieve } from "./api.js";
 
 class Widget extends React.Component {
   sswUrl = "https://www.ssw.com.au";
@@ -27,31 +27,10 @@ class Widget extends React.Component {
   async setRulesToDisplay() {
     const pullRequests = await fetchPullRequests(this.state.numberOfRules, this.state.author, this.state.token);
   
-    var filesToRetrieve = [];
-    var additionalFileDetails = [];
+    var filesToRetrieveContentsOf = await setFilesToRetrieve(pullRequests);
   
-    for (let pr of pullRequests) {
-      for (let file of pr.files.nodes) {
-        if (
-          !filesToRetrieve.includes(file.path) &&
-          (file.path.substring(file.path.length - 3) === ".md" ||
-            file.path.substring(file.path.length - 9) === ".markdown") &&
-          file.path.substring(0, 6) === "rules/"
-        ) {
-          filesToRetrieve = [...filesToRetrieve, file.path];
-  
-          additionalFileDetails = [
-            ...additionalFileDetails,
-            {
-              author: pr.author.login,
-              timestamp: new Date(pr.mergedAt),
-            },
-          ];
-        }
-      }
-    }
-  
-    var retrievedFileContents = await fetchFileContents(filesToRetrieve, this.state.numberOfRules, this.state.token);
+    var retrievedFileContents = await fetchFileContents(filesToRetrieveContentsOf, this.state.numberOfRules, this.state.token);
+
     for (let [i, file] of retrievedFileContents.entries()) {
       if (file != null) {
         var title = extractFromRuleContent("title", file);
@@ -66,8 +45,8 @@ class Widget extends React.Component {
               uri: uri,
               path: file.path,
               title: title,
-              author: additionalFileDetails[i].author,
-              timestamp: additionalFileDetails[i].timestamp,
+              author: filesToRetrieveContentsOf[i].author,
+              timestamp: filesToRetrieveContentsOf[i].timestamp,
             },
           ],
         });
