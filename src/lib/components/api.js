@@ -81,16 +81,6 @@ export async function requestMultipleFileContents(list, numberOfRules, token) {
   // .then((returnedObjects) => contents = returnedObjects)
   // .catch((error) => { return error });
 
-    // await Promise.all(promises)
-    // .then((returnedPromises) => Promise.all(for (let res of returnedPromises) {
-    //   obj = res.json();
-    //   if (obj.data.repository.object != null) {
-    //     contents = [...contents, obj.data.repository.object.text];
-    //   } else {
-    //     contents = [...contents, null];
-    //   }
-    // })
-    // .catch((error) => { return error });
   console.log(contents);
   return contents;
 }
