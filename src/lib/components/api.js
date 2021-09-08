@@ -81,7 +81,6 @@ export async function requestMultipleFileContents(list, numberOfRules, token) {
   // .then((returnedObjects) => contents = returnedObjects)
   // .catch((error) => { return error });
 
-  console.log(contents);
   return contents;
 }
 

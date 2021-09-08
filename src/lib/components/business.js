@@ -90,11 +90,9 @@ function filterOutArchivedRules(fileContents) {
 	for (let file of fileContents) {
 		var archivedReason = extractFromRuleContent("archivedreason", file);
 		if (archivedReason && archivedReason !== "null") {
-			console.log("Archived: " + archivedReason);
 			file = null;
 		}
 	}
-	console.log(fileContents);
 	return fileContents;
 }
 
