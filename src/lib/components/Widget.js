@@ -5,7 +5,7 @@ import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { formatDistanceStrict } from "date-fns";
 import Logo from "./assets/SSWLogo.png";
 import "./styles/style.css";
-import { fetchPullRequests, fetchFileContents, extractFromRuleContent, setFilesToRetrieve } from "./api.js";
+import { getRules } from "./business";
 
 class Widget extends React.Component {
   sswUrl = "https://www.ssw.com.au";
@@ -25,33 +25,42 @@ class Widget extends React.Component {
   }
 
   async setRulesToDisplay() {
-    const pullRequests = await fetchPullRequests(this.state.numberOfRules, this.state.author, this.state.token);
-  
-    var filesToRetrieveContentsOf = await setFilesToRetrieve(pullRequests);
-  
-    var retrievedFileContents = await fetchFileContents(filesToRetrieveContentsOf, this.state.numberOfRules, this.state.token);
+    var arrayOfRules = await getRules(this.state);
+    this.setState({
+      isLoaded: true,
+      rules: [
+        ...this.state.rules,
+        ...arrayOfRules
+      ]
+    });
 
-    for (let [i, file] of retrievedFileContents.entries()) {
-      if (file != null) {
-        var title = extractFromRuleContent("title", file);
-        var uri = extractFromRuleContent("uri", file);
+    // const pullRequests = await fetchAndSortPullRequestsByMergedDate(this.state.numberOfRules, this.state.author, this.state.token);
   
-        this.setState({
-          isLoaded: true,
-          rules: [
-            ...this.state.rules,
-            {
-              id: this.state.rules.length + 1,
-              uri: uri,
-              path: file.path,
-              title: title,
-              author: filesToRetrieveContentsOf[i].author,
-              timestamp: filesToRetrieveContentsOf[i].timestamp,
-            },
-          ],
-        });
-      }
-    }
+    // var filesToRetrieveContentsOf = await setFilesToRetrieve(pullRequests);
+  
+    // var retrievedFileContents = await fetchFileContents(filesToRetrieveContentsOf, this.state.numberOfRules, this.state.token);
+
+    // for (let [i, file] of retrievedFileContents.entries()) {
+    //   if (file != null) {
+    //     var title = extractFromRuleContent("title", file);
+    //     var uri = extractFromRuleContent("uri", file);
+
+    //     this.setState({
+    //       isLoaded: true,
+    //       rules: [
+    //         ...this.state.rules,
+    //         {
+    //           id: this.state.rules.length + 1,
+    //           uri: uri,
+    //           path: file.path,
+    //           title: title,
+    //           author: filesToRetrieveContentsOf[i].author,
+    //           timestamp: filesToRetrieveContentsOf[i].timestamp,
+    //         },
+    //       ],
+    //     });
+    //   }
+    // }
   }
 
   determineTheme() {

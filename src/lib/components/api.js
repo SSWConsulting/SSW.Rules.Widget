@@ -2,60 +2,6 @@ const githubOwner = "SSWConsulting";
 const githubRepo = "SSW.Rules.Content";
 const apiBaseUrl = "https://api.github.com/graphql";
 
-export async function fetchPullRequests(numberOfRules, author, token) {
-  const pullRequests = await requestPullRequests(
-    numberOfRules,
-    author,
-    token
-  );
-  pullRequests.sort((a, b) => new Date(b.mergedAt) - new Date(a.mergedAt));
-  return pullRequests;
-}
-
-export async function fetchFileContents(filesToRetrieve, numberOfRules, token) {
-  var fileContents = await requestMultipleFileContents(
-    filesToRetrieve,
-    numberOfRules,
-    token
-  );
-
-  var counter = 0;
-
-  while (
-    fileContents.filter((x) => x !== null).length < numberOfRules
-  ) {
-    var extraFile = await requestSingleFileContents(
-      filesToRetrieve[counter + numberOfRules].path,
-      token
-    );
-    fileContents = [...fileContents, extraFile];
-    counter++;
-  }
-  return fileContents;
-}
-
-export function setFilesToRetrieve(pullRequests) {
-  var filesToRetrieve = [];
-  for (let pr of pullRequests) {
-    for (let file of pr.files.nodes) {
-      if (
-        !filesToRetrieve.some(item => item.path === file.path) &&
-        (file.path.substring(file.path.length - 3) === ".md" ||
-          file.path.substring(file.path.length - 9) === ".markdown") &&
-        file.path.substring(0, 6) === "rules/"
-      ) {
-        filesToRetrieve = [...filesToRetrieve, {
-          path: file.path,
-          author: pr.author.login,
-            timestamp: new Date(pr.mergedAt),
-          },
-        ];
-      }
-    }
-  }
-  return filesToRetrieve;
-}
-
 export async function requestPullRequests(numberOfRules, author, token) {
   var response = await fetch(apiBaseUrl, {
     method: "POST",
@@ -86,10 +32,10 @@ export async function requestPullRequests(numberOfRules, author, token) {
     .then((res) => res.json())
     .catch((error) => { return error });
 
-  return response.data.search.nodes || null;
+  return response.data.search.nodes;
 }
 
-async function requestMultipleFileContents(list, numberOfRules, token) {
+export async function requestMultipleFileContents(list, numberOfRules, token) {
   var promises = [];
   for (var i = 0; i < numberOfRules; i++) {
     promises.push(
@@ -127,10 +73,29 @@ async function requestMultipleFileContents(list, numberOfRules, token) {
     )
     .catch((error) => { return error });
 
-  return contents || null;
+  // await Promise.all(promises)
+  // .then((returnedPromises) => Promise.all(returnedPromises.map((res) => {
+  //   var obj = res.json();
+  //   return obj.data.repository.object.text;
+  // })))
+  // .then((returnedObjects) => contents = returnedObjects)
+  // .catch((error) => { return error });
+
+    // await Promise.all(promises)
+    // .then((returnedPromises) => Promise.all(for (let res of returnedPromises) {
+    //   obj = res.json();
+    //   if (obj.data.repository.object != null) {
+    //     contents = [...contents, obj.data.repository.object.text];
+    //   } else {
+    //     contents = [...contents, null];
+    //   }
+    // })
+    // .catch((error) => { return error });
+  console.log(contents);
+  return contents;
 }
 
-async function requestSingleFileContents(file, token) {
+export async function requestSingleFileContents(file, token) {
   var response = await fetch(apiBaseUrl, {
     method: "POST",
     headers: {
@@ -154,11 +119,5 @@ async function requestSingleFileContents(file, token) {
     .then((res) => res.json())
     .catch((error) => { return error });
 
-  return response.data.repository.object.text || null;
-}
-
-export function extractFromRuleContent(term, text) {
-  var start = text.substring(text.search(`${term}:`));
-  var value = start.substring(term.length + 1, start.search("\\n"));
-  return value.trim();
+  return response.data.repository.object.text;
 }
