@@ -4,25 +4,25 @@ export async function getRules(state) {
 	var rules = [];
 	const pullRequests = await fetchAndSortPullRequestsByMergedDate(state.numberOfRules, state.author, state.token);
   
-    var filesToRetrieveContentsOf = await setFilesToRetrieve(pullRequests);
-  
-    var retrievedFileContents = await fetchFileContents(filesToRetrieveContentsOf, state.numberOfRules, state.token);
+  var filesToRetrieveContentsOf = await setFilesToRetrieve(pullRequests);
 
-    for (let [i, file] of retrievedFileContents.entries()) {
-      if (file != null) {
-        var title = extractFromRuleContent("title", file);
-        var uri = extractFromRuleContent("uri", file);
+  var retrievedFileContents = await fetchFileContents(filesToRetrieveContentsOf, state.numberOfRules, state.token);
 
-		rules = [...rules, {
-			id: rules.length + 1,
-			uri: uri,
-			path: file.path,
-			title: title,
-			author: filesToRetrieveContentsOf[i].author,
-			timestamp: filesToRetrieveContentsOf[i].timestamp
-		}];
-	  }
-	}
+  for (let [i, file] of retrievedFileContents.entries()) {
+    if (file) {
+      var title = extractFromRuleContent("title", file);
+      var uri = extractFromRuleContent("uri", file);
+
+      rules = [...rules, {
+        id: rules.length + 1,
+        uri: uri,
+        path: file.path,
+        title: title,
+        author: filesToRetrieveContentsOf[i].author,
+        timestamp: filesToRetrieveContentsOf[i].timestamp
+      }];
+    }
+  }
 	return rules;
 }
 
@@ -47,7 +47,7 @@ async function fetchFileContents(filesToRetrieve, numberOfRules, token) {
 
   var counter = 0;
 
-  var numberOfRulesSuccessfullyRetrieved = fileContentsNoArchived.filter((x) => x != null).length;
+  var numberOfRulesSuccessfullyRetrieved = fileContentsNoArchived.filter((x) => !x).length;
   while (numberOfRulesSuccessfullyRetrieved < numberOfRules) {
     var extraFile = await requestSingleFileContents(
       filesToRetrieve[counter + numberOfRules].path,
@@ -89,7 +89,7 @@ function setFilesToRetrieve(pullRequests) {
 function filterOutArchivedRules(fileContents) {
 	for (let file of fileContents) {
 		var archivedReason = extractFromRuleContent("archivedreason", file);
-		if (archivedReason && archivedReason !== "null") {
+  		if (archivedReason && archivedReason !== "null") {
 			file = null;
 		}
 	}
