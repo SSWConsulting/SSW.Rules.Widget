@@ -47,19 +47,19 @@ async function fetchFileContents(filesToRetrieve, numberOfRules, token) {
 
   var counter = 0;
 
-  var numberOfRulesSuccessfullyRetrieved = fileContentsNoArchived.filter((x) => !x).length;
+  var numberOfRulesSuccessfullyRetrieved = fileContentsNoArchived.filter((x) => x != null).length;
   while (numberOfRulesSuccessfullyRetrieved < numberOfRules) {
     var extraFile = await requestSingleFileContents(
       filesToRetrieve[counter + numberOfRules].path,
       token
     );
-	if (extraFile) {
-		fileContentsNoArchived = [...fileContents, extraFile];
-		numberOfRulesSuccessfullyRetrieved++;
-	}
+    if (extraFile) {
+      fileContentsNoArchived = [...fileContentsNoArchived, extraFile];
+      numberOfRulesSuccessfullyRetrieved++;
+    }
     counter++;
   }
-  return fileContents;
+  return fileContentsNoArchived;
 }
 
 function setFilesToRetrieve(pullRequests) {
