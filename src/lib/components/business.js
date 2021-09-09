@@ -3,9 +3,13 @@ import { requestPullRequests, requestMultipleFileContents, requestSingleFileCont
 export async function getRules(state) {
 	var rules = [];
 	const pullRequests = await fetchAndSortPullRequestsByMergedDate(state.numberOfRules, state.author, state.token);
-  
+
   var filesToRetrieveContentsOf = await setFilesToRetrieve(pullRequests);
 
+  if (filesToRetrieveContentsOf.length < state.numberOfRules) {
+    state.numberOfRules = filesToRetrieveContentsOf.length;
+  }
+  
   var retrievedFileContents = await fetchFileContents(filesToRetrieveContentsOf, state.numberOfRules, state.token);
 
   for (let [i, file] of retrievedFileContents.entries()) {
