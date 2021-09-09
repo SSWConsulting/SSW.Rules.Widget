@@ -3,9 +3,13 @@ import { requestPullRequests, requestMultipleFileContents, requestSingleFileCont
 export async function getRules(state) {
 	var rules = [];
 	const pullRequests = await fetchAndSortPullRequestsByMergedDate(state.numberOfRules, state.author, state.token);
-  
+
   var filesToRetrieveContentsOf = await setFilesToRetrieve(pullRequests);
 
+  if (filesToRetrieveContentsOf.length < state.numberOfRules) {
+    state.numberOfRules = filesToRetrieveContentsOf.length;
+  }
+  
   var retrievedFileContents = await fetchFileContents(filesToRetrieveContentsOf, state.numberOfRules, state.token);
 
   for (let [i, file] of retrievedFileContents.entries()) {
@@ -47,19 +51,19 @@ async function fetchFileContents(filesToRetrieve, numberOfRules, token) {
 
   var counter = 0;
 
-  var numberOfRulesSuccessfullyRetrieved = fileContentsNoArchived.filter((x) => !x).length;
+  var numberOfRulesSuccessfullyRetrieved = fileContentsNoArchived.filter((x) => x != null).length;
   while (numberOfRulesSuccessfullyRetrieved < numberOfRules) {
     var extraFile = await requestSingleFileContents(
       filesToRetrieve[counter + numberOfRules].path,
       token
     );
-	if (extraFile) {
-		fileContentsNoArchived = [...fileContents, extraFile];
-		numberOfRulesSuccessfullyRetrieved++;
-	}
+    if (extraFile) {
+      fileContentsNoArchived = [...fileContentsNoArchived, extraFile];
+      numberOfRulesSuccessfullyRetrieved++;
+    }
     counter++;
   }
-  return fileContents;
+  return fileContentsNoArchived;
 }
 
 function setFilesToRetrieve(pullRequests) {
@@ -87,10 +91,10 @@ function setFilesToRetrieve(pullRequests) {
 }
 
 function filterOutArchivedRules(fileContents) {
-	for (let file of fileContents) {
+	for (let [i, file] of fileContents.entries()) {
 		var archivedReason = extractFromRuleContent("archivedreason", file);
-  		if (archivedReason && archivedReason !== "null") {
-			file = null;
+  	if (archivedReason && archivedReason !== "null") {
+			fileContents[i] = null;
 		}
 	}
 	return fileContents;

@@ -36,7 +36,7 @@ class Widget extends React.Component {
   }
 
   determineTheme() {
-    if (!this.state.isDarkMode) {
+    if (typeof this.state.isDarkMode != 'boolean') {
       let browserDarkMode = window.matchMedia("(prefers-color-scheme: dark)");
       this.setState({
         isDarkMode: browserDarkMode ? true : false,
