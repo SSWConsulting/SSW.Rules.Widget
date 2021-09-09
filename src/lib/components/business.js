@@ -87,10 +87,10 @@ function setFilesToRetrieve(pullRequests) {
 }
 
 function filterOutArchivedRules(fileContents) {
-	for (let file of fileContents) {
+	for (let [i, file] of fileContents.entries()) {
 		var archivedReason = extractFromRuleContent("archivedreason", file);
-  		if (archivedReason && archivedReason !== "null") {
-			file = null;
+  	if (archivedReason && archivedReason !== "null") {
+			fileContents[i] = null;
 		}
 	}
 	return fileContents;
