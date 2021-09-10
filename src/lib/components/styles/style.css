@@ -1,36 +1,36 @@
-.rules-widget-container {
+.rw-container {
 	font-family: 'Open Sans', 'sans-serif';
 	font-size: inherit;
   }
   
-  .rules-widget-container a {
+  .rw-container a {
 	text-decoration: none;
 	color: #333;
   }
   
-  .rules-widget-title {
+  .rw-title {
 	display: flex;
 	align-items: center;
   }
   
-  .rules-widget-title h1 {
+  .rw-title h1 {
 	padding-left: 0.5rem;
 	white-space: nowrap;
 	overflow: hidden;
   }
   
-  .rules-widget-container a:hover {
+  .rw-container a:hover {
 	color: #cc4141;
   }
   
-  .rules-container {
+  .rw-rules-container {
 	padding: 10px;
 	background-color: #eee;
 	border: 2px solid #ccc;
 	color: #333
   }
   
-  .rules-container div {
+  .rw-rules-container div {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -40,20 +40,20 @@
 	border-left: 4px solid #cc4141;
   }
   
-  .dark div {
+  .rw-dark div {
 	background-color: #333;
   }
   
-  h1 a {
+  .rw-container h1 a {
 	text-decoration: none;
 	color: #333;
   }
   
-  .dark a {
+  .rw-dark a {
 	color: #f5f5f5;
   }
   
-  .rules-container .rule-title {
+  .rw-container .rw-rule-title {
 	font-size: 1em;
 	color: #333;
 	line-height: 1.2em;
@@ -65,7 +65,7 @@
 	flex-shrink: 1;
   }
   
-  .rules-container .rule-details {
+  .rw-rules-container .rw-rule-details {
 	font-size: 0.7em;
 	width: 90px;
 	color: #aaa;
@@ -74,12 +74,12 @@
 	flex-shrink: 0;
   }
   
-  .dark .clock {
+  .rw-dark .clock {
 	color: #cc4141;
   }
   
   @media screen and (max-width: 640px) {
-	.rules-container div {
+	.rw-container div {
 	  flex-direction: column;
 	  align-items: flex-start;
 	}
