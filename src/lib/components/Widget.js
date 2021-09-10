@@ -58,8 +58,8 @@ class Widget extends React.Component {
   render() {
     const { error, isLoaded, rules } = this.state;
     return (
-      <div className="rules-widget-container">
-        <div className="rules-widget-title">
+      <div className="rw-container">
+        <div className="rw-title">
           <a href={this.sswUrl}>
             <img src={Logo} alt="SSW Logo" height="60" width="130"></img>
           </a>
@@ -70,7 +70,7 @@ class Widget extends React.Component {
           </h1>
         </div>
         <div
-          className={`rules-container ${this.state.isDarkMode ? "dark" : ""}`}
+          className={`rw-rules-container ${this.state.isDarkMode ? "dark" : ""}`}
         >
           {error
             ? "Error: {error.message}"
@@ -78,7 +78,7 @@ class Widget extends React.Component {
             ? "Loading..."
             : rules.map((item) => (
                 <div key={item.id}>
-                  <p className="rule-title">
+                  <p className="rw-rule-title">
                     <a
                       rel="noreferrer"
                       target="_blank"
@@ -87,7 +87,7 @@ class Widget extends React.Component {
                       {item.title}
                     </a>
                   </p>
-                  <p className="rule-details">
+                  <p className="rw-rule-details">
                     <FontAwesomeIcon
                       icon={faClock}
                       className="clock"
