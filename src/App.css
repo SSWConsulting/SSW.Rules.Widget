@@ -9,13 +9,15 @@
 
 .rules-widget-title {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  margin-bottom: 8px;
 }
 
-.rules-widget-title h1 {
-  padding-left: 0.5rem;
-  white-space: nowrap;
-  overflow: hidden;
+@media screen and (max-width: 400px) {
+  .rules-widget-title {
+    flex-direction: row;
+  }
 }
 
 .rules-widget-container a:hover {
@@ -23,7 +25,6 @@
 }
 
 .rules-container {
-  padding: 10px;
   background-color: #eee;
   border: 2px solid #ccc;
   color: #333
@@ -32,9 +33,9 @@
 .rules-container div {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   margin: 10px;
-  padding: 10px 20px;
+  padding: 12px;
   background-color: #fff;
   border-left: 4px solid #cc4141;
 }
@@ -59,6 +60,7 @@ h1 a {
   max-height: 3.6em;
   display: -webkit-box;
   overflow: hidden;
+  overflow-wrap: anywhere;
   text-overflow: ellipsis;
   margin: 0;
   flex-shrink: 1;
@@ -75,11 +77,4 @@ h1 a {
 
 .dark .clock {
   color: #cc4141;
-}
-
-@media screen and (max-width: 640px) {
-  .rules-container div {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 }
