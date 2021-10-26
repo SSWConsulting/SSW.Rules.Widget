@@ -19,6 +19,7 @@
 .rw-title h1 {
 	margin: 0;
 	text-align: center;
+	font-size: 1.5rem;
 }
 
 .rw-container a:hover {
@@ -39,6 +40,7 @@
 	padding: 12px;
 	background-color: #fff;
 	border-left: 4px solid #cc4141;
+	text-align: left;
 }
 
 .rw-dark div {
@@ -65,6 +67,7 @@
 	text-overflow: ellipsis;
 	margin: 0;
 	flex-shrink: 1;
+	margin-bottom: 4px;
 }
 
 .rw-rules-container .rw-rule-details {
