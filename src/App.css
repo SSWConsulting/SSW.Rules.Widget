@@ -14,12 +14,6 @@
   margin-bottom: 8px;
 }
 
-@media screen and (max-width: 400px) {
-  .rules-widget-title {
-    flex-direction: row;
-  }
-}
-
 .rules-widget-container a:hover {
   color: #cc4141;
 }
