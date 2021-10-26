@@ -15,12 +15,6 @@
 	margin-bottom: 8px;
 }
 
-@media screen and (min-width: 400px) {
-	.rw-title {
-		flex-direction: row;
-	}
-}
-
 .rw-title h1 {
 	margin: 0;
 	text-align: center;
