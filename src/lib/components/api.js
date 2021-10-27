@@ -95,7 +95,7 @@ export async function requestSingleFileContents(file, token) {
     .then((res) => res.json())
     .catch((error) => { return error });
 
-  var responseObject = response.data.repository.object
+  var responseObject = response.data.repository.object;
   if(responseObject) {
     return response.data.repository.object.text;
   }
