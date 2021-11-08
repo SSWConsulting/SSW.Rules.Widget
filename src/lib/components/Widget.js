@@ -15,6 +15,7 @@ class Widget extends React.Component {
     super(props);
     this.state = {
       error: null,
+      showLogo: props.showLogo,
       isLoaded: false,
       rules: [],
       isDarkMode: props.isDarkMode,
@@ -33,7 +34,7 @@ class Widget extends React.Component {
         ...arrayOfRules
       ]
     });
-  }
+  }  
 
   determineTheme() {
     if (typeof this.state.isDarkMode != 'boolean') {
@@ -56,13 +57,16 @@ class Widget extends React.Component {
   }
 
   render() {
-    const { error, isLoaded, rules } = this.state;
+    const { error, isLoaded, rules, showLogo } = this.state;
     return (
       <div className="rw-container">
-        <div className="rw-title">
-          <a href={this.sswUrl}>
+        
+        <div className="rw-title" style={{marginBottom: '16px'}}>
+        {showLogo ? (
+          <a href={this.sswUrl} >
             <img src={Logo} alt="SSW Logo" height="60" width="130"></img>
           </a>
+        ) : ''}
           <h1>
             <a rel="noreferrer" target="_blank" href={`${this.sswUrl}/rules`}>
               Latest Rules
@@ -110,8 +114,13 @@ class Widget extends React.Component {
 Widget.propTypes = {
   author: PropTypes.string,
   isDarkMode: PropTypes.bool,
+  showLogo: PropTypes.bool,
   numberOfRules: PropTypes.number.isRequired,
   token: PropTypes.string.isRequired,
 };
+
+Widget.defaultProps = {
+  showLogo: true
+}
 
 export default Widget;
