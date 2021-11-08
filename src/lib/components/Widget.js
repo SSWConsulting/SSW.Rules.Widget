@@ -61,7 +61,7 @@ class Widget extends React.Component {
     return (
       <div className="rw-container">
         
-        <div className="rw-title" style={{marginBottom: '16px'}}>
+        <div className="rw-title">
         {showLogo ? (
           <a href={this.sswUrl} >
             <img src={Logo} alt="SSW Logo" height="60" width="130"></img>
