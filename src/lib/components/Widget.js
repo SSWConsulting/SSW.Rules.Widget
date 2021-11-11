@@ -67,11 +67,11 @@ class Widget extends React.Component {
             <img src={Logo} alt="SSW Logo" height="60" width="130"></img>
           </a>
         ) : ''}
-          <h1>
+          <h4>
             <a rel="noreferrer" target="_blank" href={`${this.sswUrl}/rules`}>
               Latest Rules
             </a>
-          </h1>
+          </h4>
         </div>
         <div
           className={`rw-rules-container ${this.state.isDarkMode ? "dark" : ""}`}
@@ -120,7 +120,7 @@ Widget.propTypes = {
 };
 
 Widget.defaultProps = {
-  showLogo: true
+  showLogo: false
 }
 
 export default Widget;
