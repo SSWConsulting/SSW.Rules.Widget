@@ -81,12 +81,12 @@ class Widget extends React.Component {
             : !isLoaded
             ? "Loading..."
             : rules.map((item) => (
-                <div className="rw-rule-card" key={item.id}>
-                  <a
-                    rel="noreferrer"
-                    target="_blank"
-                    href={`${this.sswUrl}/rules/${item.uri}`}
-                  >
+                <a
+                  rel="noreferrer"
+                  target="_blank"
+                  href={`${this.sswUrl}/rules/${item.uri}`}
+                >
+                  <div className="rw-rule-card" key={item.id}>
                     <p className="rw-rule-title">{item.title}</p>
                     <p className="rw-rule-details">
                       <FontAwesomeIcon
@@ -100,8 +100,8 @@ class Widget extends React.Component {
                       )}{" "}
                       ago
                     </p>
-                  </a>
-                </div>
+                  </div>
+                </a>
               ))}
         </div>
       </div>
