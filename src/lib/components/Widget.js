@@ -66,9 +66,11 @@ class Widget extends React.Component {
             ""
           )}
           <h4>
+            {(window.location.href !== `${this.sswUrl}/rules`) ?
             <a rel="noreferrer" target="_blank" href={`${this.sswUrl}/rules`}>
               Latest Rules
-            </a>
+            </a> : 'Latest Rules'
+            }
           </h4>
         </div>
         <div
