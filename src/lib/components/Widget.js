@@ -29,15 +29,12 @@ class Widget extends React.Component {
     var arrayOfRules = await getRules(this.state);
     this.setState({
       isLoaded: true,
-      rules: [
-        ...this.state.rules,
-        ...arrayOfRules
-      ]
+      rules: [...this.state.rules, ...arrayOfRules],
     });
-  }  
+  }
 
   determineTheme() {
-    if (typeof this.state.isDarkMode != 'boolean') {
+    if (typeof this.state.isDarkMode != "boolean") {
       let browserDarkMode = window.matchMedia("(prefers-color-scheme: dark)");
       this.setState({
         isDarkMode: browserDarkMode ? true : false,
@@ -60,50 +57,53 @@ class Widget extends React.Component {
     const { error, isLoaded, rules, showLogo } = this.state;
     return (
       <div className="rw-container">
-        
         <div className="rw-title">
-        {showLogo ? (
-          <a href={this.sswUrl} >
-            <img src={Logo} alt="SSW Logo" height="60" width="130"></img>
-          </a>
-        ) : ''}
-          <h1>
+          {showLogo ? (
+            <a href={this.sswUrl}>
+              <img src={Logo} alt="SSW Logo" height="60" width="130"></img>
+            </a>
+          ) : (
+            ""
+          )}
+          <h4>
+            {(window.location.href !== `${this.sswUrl}/rules`) ?
             <a rel="noreferrer" target="_blank" href={`${this.sswUrl}/rules`}>
               Latest Rules
-            </a>
-          </h1>
+            </a> : 'Latest Rules'
+            }
+          </h4>
         </div>
         <div
-          className={`rw-rules-container ${this.state.isDarkMode ? "dark" : ""}`}
+          className={`rw-rules-container ${
+            this.state.isDarkMode ? "dark" : ""
+          }`}
         >
           {error
             ? "Error: {error.message}"
             : !isLoaded
             ? "Loading..."
             : rules.map((item) => (
-                <div key={item.id}>
-                  <p className="rw-rule-title">
-                    <a
-                      rel="noreferrer"
-                      target="_blank"
-                      href={`${this.sswUrl}/rules/${item.uri}`}
-                    >
-                      {item.title}
-                    </a>
-                  </p>
-                  <p className="rw-rule-details">
-                    <FontAwesomeIcon
-                      icon={faClock}
-                      className="clock"
-                    ></FontAwesomeIcon>{" "}
-                    {this.capitalizeFirstLetter(
-                      formatDistanceStrict(item.timestamp, new Date())
-                        .replace("minute", "min")
-                        .replace("second", "sec")
-                    )}{" "}
-                    ago
-                  </p>
-                </div>
+                <a
+                  rel="noreferrer"
+                  target="_blank"
+                  href={`${this.sswUrl}/rules/${item.uri}`}
+                >
+                  <div className="rw-rule-card" key={item.id}>
+                    <p className="rw-rule-title">{item.title}</p>
+                    <p className="rw-rule-details">
+                      <FontAwesomeIcon
+                        icon={faClock}
+                        className="clock"
+                      ></FontAwesomeIcon>{" "}
+                      {this.capitalizeFirstLetter(
+                        formatDistanceStrict(item.timestamp, new Date())
+                          .replace("minute", "min")
+                          .replace("second", "sec")
+                      )}{" "}
+                      ago
+                    </p>
+                  </div>
+                </a>
               ))}
         </div>
       </div>
@@ -120,7 +120,7 @@ Widget.propTypes = {
 };
 
 Widget.defaultProps = {
-  showLogo: true
-}
+  showLogo: false,
+};
 
 export default Widget;
