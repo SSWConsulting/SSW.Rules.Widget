@@ -1,10 +1,11 @@
-import React from "react";
-import PropTypes from "prop-types";
+import "./styles/style.css";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Logo from "./assets/SSWLogo.png";
+import PropTypes from "prop-types";
+import React from "react";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { formatDistanceStrict } from "date-fns";
-import Logo from "./assets/SSWLogo.png";
-import "./styles/style.css";
 import { getRules } from "./business";
 
 class Widget extends React.Component {
@@ -22,6 +23,7 @@ class Widget extends React.Component {
       author: props.author,
       numberOfRules: props.numberOfRules > 0 ? props.numberOfRules : 10,
       token: props.token,
+      linkToSSW: props.linkToSSW,
     };
   }
 
@@ -54,7 +56,7 @@ class Widget extends React.Component {
   }
 
   render() {
-    const { error, isLoaded, rules, showLogo } = this.state;
+    const { error, isLoaded, rules, showLogo, linkToSSW } = this.state;
     return (
       <div className="rw-container">
         <div className="rw-title">
@@ -66,11 +68,13 @@ class Widget extends React.Component {
             ""
           )}
           <h4>
-            {(window.location.href !== `${this.sswUrl}/rules`) ?
-            <a rel="noreferrer" target="_blank" href={`${this.sswUrl}/rules`}>
-              Latest Rules
-            </a> : 'Latest Rules'
-            }
+            {linkToSSW ? (
+              <a rel="noreferrer" target="_blank" href={`${this.sswUrl}/rules`}>
+                Latest Rules
+              </a>
+            ) : (
+              "Latest Rules"
+            )}
           </h4>
         </div>
         <div
@@ -82,11 +86,12 @@ class Widget extends React.Component {
             ? "Error: {error.message}"
             : !isLoaded
             ? "Loading..."
-            : rules.map((item) => (
+            : rules.map((item,index) => (
                 <a
                   rel="noreferrer"
                   target="_blank"
                   href={`${this.sswUrl}/rules/${item.uri}`}
+                  key={index}
                 >
                   <div className="rw-rule-card" key={item.id}>
                     <p className="rw-rule-title">{item.title}</p>
@@ -117,10 +122,12 @@ Widget.propTypes = {
   showLogo: PropTypes.bool,
   numberOfRules: PropTypes.number.isRequired,
   token: PropTypes.string.isRequired,
+  linkToSSW: PropTypes.bool,
 };
 
 Widget.defaultProps = {
   showLogo: false,
+  linkToSSW: true,
 };
 
 export default Widget;
