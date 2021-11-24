@@ -1,15 +1,16 @@
-import React from "react";
-import PropTypes from "prop-types";
+import "./styles/style.css";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Logo from "./assets/SSWLogo.png";
+import PropTypes from "prop-types";
+import React from "react";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { formatDistanceStrict } from "date-fns";
-import Logo from "./assets/SSWLogo.png";
-import "./styles/style.css";
 import { getRules } from "./business";
 
 class Widget extends React.Component {
   sswUrl = "https://www.ssw.com.au";
-  sswRulesUrl = "https://www.ssw.com.au/rules";
+  sswRulesUrl = "https://www.ssw.com.au/rules/";
 
   constructor(props) {
     super(props);
@@ -22,6 +23,7 @@ class Widget extends React.Component {
       author: props.author,
       numberOfRules: props.numberOfRules > 0 ? props.numberOfRules : 10,
       token: props.token,
+      location: null|| props.location,
     };
   }
 
@@ -54,7 +56,7 @@ class Widget extends React.Component {
   }
 
   render() {
-    const { error, isLoaded, rules, showLogo } = this.state;
+    const { error, isLoaded, rules, showLogo, location } = this.state;
     return (
       <div className="rw-container">
         <div className="rw-title">
@@ -66,10 +68,14 @@ class Widget extends React.Component {
             ""
           )}
           <h4>
-            {(window.location.href !== `${this.sswUrl}/rules`) ?
-            <a rel="noreferrer" target="_blank" href={`${this.sswUrl}/rules`}>
+            {location?.href === this.sswRulesUrl ?
+            'Latest Rules'
+            :
+            (
+              <a rel="noreferrer" target="_blank" href={`${this.sswRulesUrl}`}>
               Latest Rules
-            </a> : 'Latest Rules'
+            </a> 
+            )
             }
           </h4>
         </div>
@@ -80,13 +86,13 @@ class Widget extends React.Component {
         >
           {error
             ? "Error: {error.message}"
-            : !isLoaded
-            ? "Loading..."
-            : rules.map((item) => (
+            : isLoaded
+            ? rules.map((item,idx) => (
                 <a
                   rel="noreferrer"
                   target="_blank"
-                  href={`${this.sswUrl}/rules/${item.uri}`}
+                  href={`${this.sswRulesUrl}/${item.uri}`}
+                  key={idx}
                 >
                   <div className="rw-rule-card" key={item.id}>
                     <p className="rw-rule-title">{item.title}</p>
@@ -104,7 +110,8 @@ class Widget extends React.Component {
                     </p>
                   </div>
                 </a>
-              ))}
+              ))
+            : "Loading..."}
         </div>
       </div>
     );
@@ -117,6 +124,7 @@ Widget.propTypes = {
   showLogo: PropTypes.bool,
   numberOfRules: PropTypes.number.isRequired,
   token: PropTypes.string.isRequired,
+  location: PropTypes.object
 };
 
 Widget.defaultProps = {
