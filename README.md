@@ -48,7 +48,7 @@ function ExamplePage() {
       <Widget token={tokenVariable} />
 
       /* Using all the options */
-      <Widget token={tokenVariable} isDarkMode={true} numberOfRules={5} author={authorGitHubUsername} />
+      <Widget token={tokenVariable} isDarkMode={true} numberOfRules={5} author={authorGitHubUsername} location={window.location}/>
     </>
   );
 }
@@ -61,6 +61,7 @@ function ExamplePage() {
 | isDarkMode | boolean | null | No | Determines whether to show the widget in dark mode. When left blank, displays theme matching browser preferences, or light mode by default.  |
 | numberOfRules | int | 10 | No | Number of rules to display in the widget. Must be a positive integer, or default will be used. |
 | author | string | null | No | GitHub username of author to filter by. When set, the widget will show the most recent rules updated by the specified user. When left blank, the widget will show the most recent results for all rules. |
+| location | object (Location) | null | No | When given a windows location the widget will determine if the url is the same as `ssw.com.au/rules` and won't link to itself. As per the [SSW Rule](https://www.ssw.com.au/rules/do-you-avoid-linking-a-page-to-itself)
 
 ## Contributing
 
