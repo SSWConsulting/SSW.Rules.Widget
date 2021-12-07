@@ -1,6 +1,11 @@
 import { requestPullRequests, requestMultipleFileContents, requestSingleFileContents } from './api';
+import fetch from 'react-fetch'
 
-export async function getRules(state) {
+export async function getRules(rulesUrl){
+  return fetch(rulesUrl).then(response => response.json);
+}
+
+export async function zzgetRules(state) {
 	var rules = [];
 	const pullRequests = await fetchAndSortPullRequestsByMergedDate(state.numberOfRules, state.author, state.token);
 
