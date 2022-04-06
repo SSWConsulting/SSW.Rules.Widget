@@ -91,7 +91,7 @@ class Widget extends React.Component {
                 <a
                   rel="noreferrer"
                   target="_blank"
-                  href={`${this.sswRulesUrl}/${item.uri}`}
+                  href={`${this.sswRulesUrl}${item.uri}`}
                   key={idx}
                 >
                   <div className="rw-rule-card" key={item.id}>
