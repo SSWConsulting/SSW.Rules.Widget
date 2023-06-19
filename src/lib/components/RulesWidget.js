@@ -1,22 +1,18 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { formatDistanceStrict } from "date-fns";
-import "./styles/style.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Logo from "./assets/SSWLogo.png";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
-import { 
-    useState, 
-    useEffect 
-} from 'react'
+import Logo from "./assets/SSWLogo.png";
+import "./styles/style.css";
 
 export default function RulesWidget({
     rulesUrl = 'https://ssw.com.au/rules',
-    showLogo = false,
+    showLogo,
     location = window.location.href,
     ruleCount = 10,
-    ruleEditor = null
+    ruleEditor,
+    token
 }){
-
     const sswUrl = "https://www.ssw.com.au";
 
     const [isLoading, setLoading] = useState(true);
@@ -25,38 +21,50 @@ export default function RulesWidget({
     
     //Fetch the rules from the rulesUrl
     useEffect(() =>{
-        
         async function fetchData(){
-            if(isLoading){
-                await fetch(`${rulesUrl}/history-feed.json`)
-                .then(async function(response) {
-                    const json = await response.json();  
-                    
-                    setData(filterData(json));
-                })
-                .then(setLoading(false))
-                .catch(error => {
-                    setError(error);
-                })
+            try {
+                const response = await fetch(`${rulesUrl}/history-feed.json`)
+                const json = await response.json()
+                setData(await filterData(json))
+                setLoading(false)
+            } catch (error) {
+                setError(error)
             }
         }       
-        function filterData(json){
+        async function filterData(json){
             var filteredData = json;
 
-            //TODO: Fix finding the rule editor
-            //Filters the data by the editor
-            if(ruleEditor)
-                filteredData = filteredData.find(x => x.lastedUpdatedBy === ruleEditor)
-                
-            //Filter rule count
-            if(json.length > ruleCount)
-                filteredData = filteredData.slice(0, ruleCount);
+            if(ruleEditor) {
+                const userName = await fetchGithubName(ruleEditor)
+                return filteredData.filter(x => formatName(x.lastUpdatedBy) === userName)
+            }
+        
+            return filteredData.length > ruleCount ? filteredData.splice(0, ruleCount) : filteredData;
+        }
 
-            return filteredData;
+        async function fetchGithubName(ruleEditor) {
+            try {
+                const response = await fetch(`https://api.github.com/users/${ruleEditor}`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: token ? `bearer ${token}` : "",
+                    }
+                })
+
+                const { name } = await response.json();
+                return formatName(name)
+            } catch (error) {
+                throw error;
+            }
         }
 
         fetchData();
-    }, [data, isLoading, error, rulesUrl, ruleCount, ruleEditor])
+    }, [rulesUrl, ruleCount, ruleEditor, token])
+
+    function formatName(name) {
+        if (!name) return
+        return name.replace("[SSW]", "").replace(/\s/g, "").toLowerCase()
+    }
 
     function getLastUpdatedTime(lastUpdatedDate){
         return formatDistanceStrict(
@@ -77,26 +85,30 @@ export default function RulesWidget({
             )
         else if(data)
             return(
-                data.map((item, idx) => (
-                    <a
-                        key={idx}
-                        rel="noreferrer"
-                        target="_blank"
-                        href={`${rulesUrl}/${item.uri}`}
-                    >
-                        <div className="rw-rule-card" key={idx}>
-                            <p className="rw-rule-title">{item.title}</p>
-                            <p className="rw-rule-details">
-                                <FontAwesomeIcon
-                                    icon={faClock}
-                                    className="clock"
-                                ></FontAwesomeIcon>{" "}
-                                {getLastUpdatedTime(item.lastUpdated)}
-                            </p>
-                        </div>                            
-                    </a>
-                ))
+                data.map((item, idx) => {
+                    if (item.title !== "No title") {
+                        return (<a
+                            key={idx}
+                            rel="noreferrer"
+                            target="_blank"
+                            href={`${rulesUrl}/${item.uri}`}
+                        >
+                            <div className="rw-rule-card" key={idx}>
+                                <p className="rw-rule-title">{item.title}</p>
+                                <p className="rw-rule-details">
+                                    <FontAwesomeIcon
+                                        icon={faClock}
+                                        className="clock"
+                                    ></FontAwesomeIcon>{" "}
+                                    {getLastUpdatedTime(item.lastUpdated)}
+                                </p>
+                            </div>                            
+                        </a>)
+                    }
+                    return null
+                })
             )
+            
     }
 
     return(
