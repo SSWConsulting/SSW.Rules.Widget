@@ -11,7 +11,8 @@ export default function RulesWidget({
     location = window.location.href,
     ruleCount = 10,
     ruleEditor,
-    token
+    token,
+    isDarkMode = false
 }){
     const sswUrl = "https://www.ssw.com.au";
 
@@ -129,7 +130,7 @@ export default function RulesWidget({
                         </a>}
                 </h4>
             </div>
-            <div className="rw-rules-container">
+            <div className={`rw-rules-container ${isDarkMode ? "rw-dark" : ""}`}>
                 {getContent()} 
             </div>
         </div>
