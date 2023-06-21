@@ -24,7 +24,7 @@ export default function RulesWidget({
     useEffect(() =>{
         async function fetchData(){
             try {
-                const response = await fetch(`${rulesUrl}/history-feed.json`)
+                const response = await fetch(`${rulesUrl}/widget-history.json`)
                 const json = await response.json()
                 setData(await filterData(json))
                 setLoading(false)
