@@ -93,3 +93,7 @@ h4 {
 .rw-dark .clock {
 	color: #cc4141;
 }
+
+.rw-dark .rw-rule-title {
+	color: #f5f5f5;
+}
