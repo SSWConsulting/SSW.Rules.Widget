@@ -6,7 +6,7 @@ import Logo from "./assets/SSWLogo.png";
 import "./styles/style.css";
 
 export default function RulesWidget({
-    rulesUrl = 'https://ssw.com.au/rules',
+    rulesUrl = 'https://www.ssw.com.au/rules',
     showLogo,
     location = window.location.href,
     ruleCount = 10,
