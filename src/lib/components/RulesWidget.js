@@ -37,7 +37,7 @@ export default function RulesWidget({
 
             if(ruleEditor) {
                 const userName = await fetchGithubName(ruleEditor)
-                return filteredData.filter(x => formatName(x.lastUpdatedBy) === userName)
+                filteredData = filteredData.filter(x => formatName(x.lastUpdatedBy) === userName && x.title !== "No title")
             }
         
             return filteredData.length > ruleCount ? filteredData.splice(0, ruleCount) : filteredData;
@@ -87,26 +87,23 @@ export default function RulesWidget({
         else if(data)
             return(
                 data.map((item, idx) => {
-                    if (item.title !== "No title") {
-                        return (<a
-                            key={idx}
-                            rel="noreferrer"
-                            target="_blank"
-                            href={`${rulesUrl}/${item.uri}`}
-                        >
-                            <div className="rw-rule-card" key={idx}>
-                                <p className="rw-rule-title">{item.title}</p>
-                                <p className="rw-rule-details">
-                                    <FontAwesomeIcon
-                                        icon={faClock}
-                                        className="clock"
-                                    ></FontAwesomeIcon>{" "}
-                                    {getLastUpdatedTime(item.lastUpdated)}
-                                </p>
-                            </div>                            
-                        </a>)
-                    }
-                    return null
+                    return (<a
+                        key={idx}
+                        rel="noreferrer"
+                        target="_blank"
+                        href={`${rulesUrl}/${item.uri}`}
+                    >
+                        <div className="rw-rule-card" key={idx}>
+                            <p className="rw-rule-title">{item.title}</p>
+                            <p className="rw-rule-details">
+                                <FontAwesomeIcon
+                                    icon={faClock}
+                                    className="clock"
+                                ></FontAwesomeIcon>{" "}
+                                {getLastUpdatedTime(item.lastUpdated)}
+                            </p>
+                        </div>                            
+                    </a>)
                 })
             )
             

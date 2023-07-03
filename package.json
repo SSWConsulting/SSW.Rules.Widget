@@ -8,7 +8,7 @@
     "widget",
     "standards"
   ],
-  "version": "1.3.1",
+  "version": "1.3.2",
   "private": false,
   "license": "MIT",
   "main": "dist/index.js",
