@@ -1,9 +1,9 @@
-import { RulesWidget } from './lib';
+import Widget from './lib/components/Widget'
 
 function App() {
   return (
     <div className="App">
-      <RulesWidget />
+      <Widget isDarkMode={true} numberOfRules={5} token={process.env.REACT_APP_GITHUB_PAT} location={window.location}></Widget>
     </div>
   );
 }

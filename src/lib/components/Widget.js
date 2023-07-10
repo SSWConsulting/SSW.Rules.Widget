@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { formatDistanceStrict } from "date-fns";
+import { getRules } from "./business";
 
 class Widget extends React.Component {
   sswUrl = "https://www.ssw.com.au";
@@ -27,7 +28,7 @@ class Widget extends React.Component {
   }
 
   async setRulesToDisplay() {
-    var arrayOfRules = []
+    var arrayOfRules = await getRules(this.state);
     this.setState({
       isLoaded: true,
       rules: [...this.state.rules, ...arrayOfRules],
