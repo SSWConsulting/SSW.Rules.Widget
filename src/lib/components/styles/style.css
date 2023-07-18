@@ -90,6 +90,20 @@ h4 {
 	flex-shrink: 0;
 }
 
+.rw-rules-container .rw-see-more {
+	font-size: 1rem;
+	color: #333;
+	line-height: 0.8em;
+	display: block;
+	padding: 12px;
+	background-color: #f5f5f5;
+	text-align: center;
+}
+
+.rw-rules-container .rw-see-more:hover {
+	box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+}
+
 .rw-dark .clock {
 	color: #cc4141;
 }
