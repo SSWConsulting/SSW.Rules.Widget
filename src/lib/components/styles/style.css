@@ -39,7 +39,7 @@
 	box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
 }
 
-.rw-rules-container div {
+.rw-rules-container div:not(.see-more-container) {
 	display: flex;
 	justify-content: space-between;
 	flex-direction: column;
@@ -90,18 +90,16 @@ h4 {
 	flex-shrink: 0;
 }
 
-.rw-rules-container .rw-see-more {
-	font-size: 1rem;
-	color: #333;
-	line-height: 0.8em;
-	display: block;
-	padding: 12px;
-	background-color: #f5f5f5;
+.rw-rules-container .see-more-container {
 	text-align: center;
+	line-height: 0.8em;
+	padding: 12px;
 }
 
-.rw-rules-container .rw-see-more:hover {
-	box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+.rw-rules-container .rw-see-more {
+	font-size: 1rem;
+	color: #cc4141;
+	text-decoration: underline;
 }
 
 .rw-dark .clock {
