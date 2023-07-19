@@ -80,7 +80,7 @@ class Widget extends React.Component {
         {
           this.state.author && !!rules.length && (
           <div className="see-more-container">
-            <a rel="noreferrer" target="_blanck" className="rw-see-more" href={`${this.sswRulesUrl}latest-rules/?author=${this.state.author}`}>See More</a>
+            <a rel="noreferrer" target="_blank" className="rw-see-more" href={`${this.sswRulesUrl}latest-rules/?author=${this.state.author}`}>See More</a>
           </div>
           )
         }
