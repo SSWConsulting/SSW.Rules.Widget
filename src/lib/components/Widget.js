@@ -50,6 +50,44 @@ class Widget extends React.Component {
     );
   }
 
+  renderRuleList(rules) {
+      return (
+        <>
+        {rules.map((item,idx) => (
+          <a
+            rel="noreferrer"
+            target="_blank"
+            href={`${this.sswRulesUrl}${item.uri}`}
+            key={idx}
+          >
+            <div className="rw-rule-card" key={item.id}>
+              <p className="rw-rule-title">{item.title}</p>
+              <p className="rw-rule-details">
+                <FontAwesomeIcon
+                  icon={faClock}
+                  className="clock"
+                ></FontAwesomeIcon>{" "}
+                {this.capitalizeFirstLetter(
+                  formatDistanceStrict(item.timestamp, new Date())
+                    .replace("minute", "min")
+                    .replace("second", "sec")
+                )}{" "}
+                ago
+              </p>
+            </div>
+          </a>
+        ))}
+        {
+          this.state.author && !!rules.length && (
+          <div className="see-more-container">
+            <a rel="noreferrer" target="_blank" className="rw-see-more" href={`${this.sswRulesUrl}latest-rules/?author=${this.state.author}`}>See More</a>
+          </div>
+          )
+        }
+        </>
+      )
+  }
+
   componentDidMount() {
     this.determineTheme();
     this.setRulesToDisplay();
@@ -87,30 +125,7 @@ class Widget extends React.Component {
           {error
             ? "Error: {error.message}"
             : isLoaded
-            ? rules.map((item,idx) => (
-                <a
-                  rel="noreferrer"
-                  target="_blank"
-                  href={`${this.sswRulesUrl}${item.uri}`}
-                  key={idx}
-                >
-                  <div className="rw-rule-card" key={item.id}>
-                    <p className="rw-rule-title">{item.title}</p>
-                    <p className="rw-rule-details">
-                      <FontAwesomeIcon
-                        icon={faClock}
-                        className="clock"
-                      ></FontAwesomeIcon>{" "}
-                      {this.capitalizeFirstLetter(
-                        formatDistanceStrict(item.timestamp, new Date())
-                          .replace("minute", "min")
-                          .replace("second", "sec")
-                      )}{" "}
-                      ago
-                    </p>
-                  </div>
-                </a>
-              ))
+            ? this.renderRuleList(rules)
             : "Loading..."}
         </div>
       </div>
