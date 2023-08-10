@@ -20,7 +20,6 @@ export default function RulesWidget({
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     
-    //Fetch the rules from the rulesUrl
     useEffect(() =>{
         async function fetchData(){
             try {
@@ -35,20 +34,12 @@ export default function RulesWidget({
         async function filterData(json){
             let filteredData = json;
 
-            // if(ruleEditor) {
-            //     const userName = await fetchGithubName(ruleEditor)
-            //     filteredData = filteredData.filter(x => formatName(x.lastUpdatedBy) === userName && x.title !== "No title")
-            // }
-
             if (ruleEditor) {
-                console.log("ruleEditor:", ruleEditor)
-                console.log("filterData", filteredData)
                 filteredData = filteredData.filter(x => x.user === ruleEditor)
             }
 
             const widgetData = flattenData(filteredData[0].commits)
             // TODO: Get top 10 latest rules when there is no specific ruleEditor
-            // return filteredData.length > ruleCount ? filteredData[0].commits.splice(0, ruleCount) : filteredData;
             return widgetData
         }
 
@@ -71,29 +62,8 @@ export default function RulesWidget({
             return newCommitData
         }
 
-        async function fetchGithubName(ruleEditor) {
-            try {
-                const response = await fetch(`https://api.github.com/users/${ruleEditor}`, {
-                    method: "GET",
-                    headers: {
-                        Authorization: token ? `bearer ${token}` : "",
-                    }
-                })
-
-                const { name } = await response.json();
-                return formatName(name)
-            } catch (error) {
-                throw error;
-            }
-        }
-
         fetchData();
     }, [rulesUrl, ruleCount, ruleEditor, token])
-
-    function formatName(name) {
-        if (!name) return
-        return name.replace("[SSW]", "").replace(/\s/g, "").toLowerCase()
-    }
 
     function getLastUpdatedTime(lastUpdatedDate){
         return formatDistanceStrict(
@@ -113,7 +83,6 @@ export default function RulesWidget({
                 <p>There was an error: {error.message}</p>
             )
         else if(data) {
-            console.log("???", data)
             return(
                 data.map((item, idx) => {
                     return (<a
