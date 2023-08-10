@@ -24,7 +24,7 @@ export default function RulesWidget({
     useEffect(() =>{
         async function fetchData(){
             try {
-                const response = await fetch(`${rulesUrl}/widget-history.json`)
+                const response = await fetch(`${rulesUrl}/commits.json`)
                 const json = await response.json()
                 setData(await filterData(json))
                 setLoading(false)
@@ -33,14 +33,42 @@ export default function RulesWidget({
             }
         }       
         async function filterData(json){
-            var filteredData = json;
+            let filteredData = json;
 
-            if(ruleEditor) {
-                const userName = await fetchGithubName(ruleEditor)
-                filteredData = filteredData.filter(x => formatName(x.lastUpdatedBy) === userName && x.title !== "No title")
+            // if(ruleEditor) {
+            //     const userName = await fetchGithubName(ruleEditor)
+            //     filteredData = filteredData.filter(x => formatName(x.lastUpdatedBy) === userName && x.title !== "No title")
+            // }
+
+            if (ruleEditor) {
+                console.log("ruleEditor:", ruleEditor)
+                console.log("filterData", filteredData)
+                filteredData = filteredData.filter(x => x.user === ruleEditor)
             }
+
+            const widgetData = flattenData(filteredData[0].commits)
+            // TODO: Get top 10 latest rules when there is no specific ruleEditor
+            // return filteredData.length > ruleCount ? filteredData[0].commits.splice(0, ruleCount) : filteredData;
+            return widgetData
+        }
+
+        function flattenData(oldCommitData) {
+            const newCommitData = [];
+            const seenTitles = new Set();
         
-            return filteredData.length > ruleCount ? filteredData.splice(0, ruleCount) : filteredData;
+            oldCommitData.forEach(commit => {
+                commit.FilesChanged.forEach(file => {
+                    if (!seenTitles.has(file.title)) {
+                        newCommitData.push({
+                            updatedTime: commit.CommitTime,
+                            ...file
+                        });
+                        seenTitles.add(file.title);
+                    }
+                });
+            });
+
+            return newCommitData
         }
 
         async function fetchGithubName(ruleEditor) {
@@ -84,7 +112,8 @@ export default function RulesWidget({
             return(
                 <p>There was an error: {error.message}</p>
             )
-        else if(data)
+        else if(data) {
+            console.log("???", data)
             return(
                 data.map((item, idx) => {
                     return (<a
@@ -100,12 +129,12 @@ export default function RulesWidget({
                                     icon={faClock}
                                     className="clock"
                                 ></FontAwesomeIcon>{" "}
-                                {getLastUpdatedTime(item.lastUpdated)}
+                                {getLastUpdatedTime(item.updatedTime)}
                             </p>
                         </div>                            
                     </a>)
                 })
-            )
+            )}
             
     }
 
