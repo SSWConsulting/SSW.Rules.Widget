@@ -93,25 +93,36 @@ export default function RulesWidget({
             )
         else if(data) {
             return(
-                data.map((item, idx) => {
-                    return (<a
-                        key={idx}
-                        rel="noreferrer"
-                        target="_blank"
-                        href={`${rulesUrl}/${item.uri}`}
-                    >
-                        <div className="rw-rule-card" key={idx}>
-                            <p className="rw-rule-title">{item.title}</p>
-                            <p className="rw-rule-details">
-                                <FontAwesomeIcon
-                                    icon={faClock}
-                                    className="clock"
-                                ></FontAwesomeIcon>{" "}
-                                {getLastUpdatedTime(item.updatedTime)} ago
-                            </p>
-                        </div>                            
-                    </a>)
-                })
+                <>
+                {
+                    data.map((item, idx) => {
+                        return (<a
+                            key={idx}
+                            rel="noreferrer"
+                            target="_blank"
+                            href={`${rulesUrl}/${item.uri}`}
+                        >
+                            <div className="rw-rule-card" key={idx}>
+                                <p className="rw-rule-title">{item.title}</p>
+                                <p className="rw-rule-details">
+                                    <FontAwesomeIcon
+                                        icon={faClock}
+                                        className="clock"
+                                    ></FontAwesomeIcon>{" "}
+                                    {getLastUpdatedTime(item.updatedTime)} ago
+                                </p>
+                            </div>                            
+                        </a>)
+                    })
+                }
+                {
+                    ruleEditor && !!data.length && (
+                    <div className="see-more-container">
+                        <a rel="noreferrer" target="_blank" className="rw-see-more" href={`${rulesUrl}latest-rules/?author=${ruleEditor}`}>See More</a>
+                    </div>
+                    )
+                }
+                </>
             )}
             
     }
