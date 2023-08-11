@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { formatDistanceStrict } from "date-fns";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getRules } from "./business";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Logo from "./assets/SSWLogo.png";
 import "./styles/style.css";
 
@@ -23,24 +24,32 @@ export default function RulesWidget({
     useEffect(() =>{
         async function fetchData(){
             try {
-                const response = await fetch(`${rulesUrl}/commits.json`)
-                const json = await response.json()
-                setData(await filterData(json))
+                let widgetData = []
+                if (ruleEditor) {
+                    const response = await fetch(`${rulesUrl}/commits.json`)
+                    const json = await response.json()
+                    widgetData = await filterData(json)
+                } else {
+                    const stateObj = {
+                        token,
+                        numberOfRules: ruleCount
+                    }
+                    const arrayOfRules = await getRules(stateObj)
+                    widgetData = arrayOfRules.map(item => ({
+                        uri: item.uri,
+                        title: item.title,
+                        updatedTime: item.timestamp
+                    }))
+                }
+                setData(widgetData)
                 setLoading(false)
             } catch (error) {
                 setError(error)
             }
         }       
         async function filterData(json){
-            let filteredData = json;
-
-            if (ruleEditor) {
-                filteredData = filteredData.filter(x => x.user === ruleEditor)
-            }
-
-            const widgetData = flattenData(filteredData[0].commits)
-            // TODO: Get top 10 latest rules when there is no specific ruleEditor
-            return widgetData
+            const editorData = json.find(x => x.user === ruleEditor) || { commits: []};
+            return flattenData(editorData.commits)
         }
 
         function flattenData(oldCommitData) {
@@ -98,7 +107,7 @@ export default function RulesWidget({
                                     icon={faClock}
                                     className="clock"
                                 ></FontAwesomeIcon>{" "}
-                                {getLastUpdatedTime(item.updatedTime)}
+                                {getLastUpdatedTime(item.updatedTime)} ago
                             </p>
                         </div>                            
                     </a>)
