@@ -49,7 +49,8 @@ export default function RulesWidget({
         }       
         async function filterData(json){
             const editorData = json.find(x => x.user === ruleEditor) || { commits: []};
-            return flattenData(editorData.commits)
+            let filteredData = flattenData(editorData.commits)
+            return filteredData.length > ruleCount ? filteredData.splice(0, ruleCount) : filteredData;
         }
 
         function flattenData(oldCommitData) {
