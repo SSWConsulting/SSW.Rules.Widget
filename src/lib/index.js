@@ -1,3 +1,3 @@
-import Widget from './components/Widget';
+import RulesWidget from './components/RulesWidget';
 
-export { Widget };
+export { RulesWidget };

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { formatDistanceStrict } from "date-fns";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getRules } from "./business";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Logo from "./assets/SSWLogo.png";
 import "./styles/style.css";
 
@@ -20,52 +21,59 @@ export default function RulesWidget({
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     
-    //Fetch the rules from the rulesUrl
     useEffect(() =>{
         async function fetchData(){
             try {
-                const response = await fetch(`${rulesUrl}/widget-history.json`)
-                const json = await response.json()
-                setData(await filterData(json))
+                let widgetData = []
+                if (ruleEditor) {
+                    const response = await fetch(`${rulesUrl}/commits.json`)
+                    const json = await response.json()
+                    widgetData = await filterData(json)
+                } else {
+                    const stateObj = {
+                        token,
+                        numberOfRules: ruleCount
+                    }
+                    const arrayOfRules = await getRules(stateObj)
+                    widgetData = arrayOfRules.map(item => ({
+                        uri: item.uri,
+                        title: item.title,
+                        updatedTime: item.timestamp
+                    }))
+                }
+                setData(widgetData)
                 setLoading(false)
             } catch (error) {
                 setError(error)
             }
         }       
         async function filterData(json){
-            var filteredData = json;
-
-            if(ruleEditor) {
-                const userName = await fetchGithubName(ruleEditor)
-                filteredData = filteredData.filter(x => formatName(x.lastUpdatedBy) === userName && x.title !== "No title")
-            }
-        
+            const editorData = json.find(x => x.user === ruleEditor) || { commits: []};
+            let filteredData = flattenData(editorData.commits)
             return filteredData.length > ruleCount ? filteredData.splice(0, ruleCount) : filteredData;
         }
 
-        async function fetchGithubName(ruleEditor) {
-            try {
-                const response = await fetch(`https://api.github.com/users/${ruleEditor}`, {
-                    method: "GET",
-                    headers: {
-                        Authorization: token ? `bearer ${token}` : "",
+        function flattenData(oldCommitData) {
+            const newCommitData = [];
+            const seenTitles = new Set();
+        
+            oldCommitData.forEach(commit => {
+                commit.FilesChanged.forEach(file => {
+                    if (!seenTitles.has(file.title)) {
+                        newCommitData.push({
+                            updatedTime: commit.CommitTime,
+                            ...file
+                        });
+                        seenTitles.add(file.title);
                     }
-                })
+                });
+            });
 
-                const { name } = await response.json();
-                return formatName(name)
-            } catch (error) {
-                throw error;
-            }
+            return newCommitData
         }
 
         fetchData();
     }, [rulesUrl, ruleCount, ruleEditor, token])
-
-    function formatName(name) {
-        if (!name) return
-        return name.replace("[SSW]", "").replace(/\s/g, "").toLowerCase()
-    }
 
     function getLastUpdatedTime(lastUpdatedDate){
         return formatDistanceStrict(
@@ -84,28 +92,39 @@ export default function RulesWidget({
             return(
                 <p>There was an error: {error.message}</p>
             )
-        else if(data)
+        else if(data) {
             return(
-                data.map((item, idx) => {
-                    return (<a
-                        key={idx}
-                        rel="noreferrer"
-                        target="_blank"
-                        href={`${rulesUrl}/${item.uri}`}
-                    >
-                        <div className="rw-rule-card" key={idx}>
-                            <p className="rw-rule-title">{item.title}</p>
-                            <p className="rw-rule-details">
-                                <FontAwesomeIcon
-                                    icon={faClock}
-                                    className="clock"
-                                ></FontAwesomeIcon>{" "}
-                                {getLastUpdatedTime(item.lastUpdated)}
-                            </p>
-                        </div>                            
-                    </a>)
-                })
-            )
+                <>
+                {
+                    data.map((item, idx) => {
+                        return (<a
+                            key={idx}
+                            rel="noreferrer"
+                            target="_blank"
+                            href={`${rulesUrl}/${item.uri}`}
+                        >
+                            <div className="rw-rule-card" key={idx}>
+                                <p className="rw-rule-title">{item.title}</p>
+                                <p className="rw-rule-details">
+                                    <FontAwesomeIcon
+                                        icon={faClock}
+                                        className="clock"
+                                    ></FontAwesomeIcon>{" "}
+                                    {getLastUpdatedTime(item.updatedTime)} ago
+                                </p>
+                            </div>                            
+                        </a>)
+                    })
+                }
+                {
+                    ruleEditor && !!data.length && (
+                    <div className="see-more-container">
+                        <a rel="noreferrer" target="_blank" className="rw-see-more" href={`${rulesUrl}latest-rules/?author=${ruleEditor}`}>See More</a>
+                    </div>
+                    )
+                }
+                </>
+            )}
             
     }
 
