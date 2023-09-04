@@ -8,6 +8,7 @@ import "./styles/style.css";
 
 export default function RulesWidget({
     rulesUrl = 'https://www.ssw.com.au/rules',
+    userRulesUrl = 'https://ssw.com.au/rules/user-rules/?author=',
     showLogo,
     location = window.location.href,
     ruleCount = 10,
@@ -119,7 +120,7 @@ export default function RulesWidget({
                 {
                     ruleEditor && !!data.length && (
                     <div className="see-more-container">
-                        <a rel="noreferrer" target="_blank" className="rw-see-more" href={`${rulesUrl}latest-rules/?author=${ruleEditor}`}>See More</a>
+                        <a rel="noreferrer" target="_blank" className="rw-see-more" href={`${userRulesUrl}${ruleEditor}`}>See More</a>
                     </div>
                     )
                 }
