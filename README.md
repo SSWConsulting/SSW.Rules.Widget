@@ -37,6 +37,10 @@ read:gpg_key
 7. Store your personal access token somewhere secure in your app for use in the SSW Rules Widget.   
 See [SSW Rules - Do you store your secrets securely?](https://www.ssw.com.au/rules/store-your-secrets-securely/)
 
+### Application Insights
+The SSW Rules Widget supports application insights, simply provide a `SSWRULESWIDGET_APPINSIGHTS_INSTRUMENTATIONKEY`
+environment variable.
+
 ### Examples
 ```javascript
 import { Widget } from 'ssw.rules.widget';
