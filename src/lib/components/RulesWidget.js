@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { formatDistanceStrict } from "date-fns";
 import { getRules } from "./business";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
@@ -14,14 +15,23 @@ export default function RulesWidget({
     ruleCount = 10,
     ruleEditor,
     token,
+    insightsToken,
     isDarkMode = false
 }){
+    const appInsights = new ApplicationInsights({
+        config: {
+          instrumentationKey: insightsToken,
+        },
+    });
+
+    appInsights.loadAppInsights();
+
     const sswUrl = "https://www.ssw.com.au";
 
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
-    
+
     useEffect(() =>{
         async function fetchData(){
             try {
@@ -33,6 +43,7 @@ export default function RulesWidget({
                 } else {
                     const stateObj = {
                         token,
+                        appInsights,
                         numberOfRules: ruleCount
                     }
                     const arrayOfRules = await getRules(stateObj)

@@ -2,7 +2,7 @@ import { requestPullRequests, requestMultipleFileContents, requestSingleFileCont
 
 export async function getRules(state) {
 	var rules = [];
-	const pullRequests = await fetchAndSortPullRequestsByMergedDate(state.numberOfRules, state.author, state.token);
+	const pullRequests = await fetchAndSortPullRequestsByMergedDate(state.numberOfRules, state.author, state.token, state.appInsights);
 
   var filesToRetrieveContentsOf = await setFilesToRetrieve(pullRequests);
 
@@ -10,7 +10,7 @@ export async function getRules(state) {
     state.numberOfRules = filesToRetrieveContentsOf.length;
   }
   
-  var retrievedFileContents = await fetchFileContents(filesToRetrieveContentsOf, state.numberOfRules, state.token);
+  var retrievedFileContents = await fetchFileContents(filesToRetrieveContentsOf, state.numberOfRules, state.token, state.appInsights);
 
   for (let [i, file] of retrievedFileContents.entries()) {
     if (file) {
@@ -33,18 +33,20 @@ export async function getRules(state) {
 async function fetchAndSortPullRequestsByMergedDate(
   numberOfRules,
   author,
-  token
+  token,
+  appInsights
 ) {
-  const pullRequests = await requestPullRequests(numberOfRules, author, token);
+  const pullRequests = await requestPullRequests(numberOfRules, author, token, appInsights);
   pullRequests.sort((a, b) => new Date(b.mergedAt) - new Date(a.mergedAt));
   return pullRequests;
 }
 
-async function fetchFileContents(filesToRetrieve, numberOfRules, token) {
+async function fetchFileContents(filesToRetrieve, numberOfRules, token, appInsights) {
   var fileContents = await requestMultipleFileContents(
     filesToRetrieve,
     numberOfRules,
-    token
+    token,
+    appInsights
   );
 
   var fileContentsNoArchived = await filterOutArchivedRules(fileContents);
@@ -56,7 +58,8 @@ async function fetchFileContents(filesToRetrieve, numberOfRules, token) {
     if(filesToRetrieve[counter + numberOfRules] && filesToRetrieve[counter + numberOfRules].path) {
       var extraFile = await requestSingleFileContents(
         filesToRetrieve[counter + numberOfRules].path,
-        token
+        token,
+        appInsights
       );
       if (extraFile) {
         fileContentsNoArchived = [...fileContentsNoArchived, extraFile];

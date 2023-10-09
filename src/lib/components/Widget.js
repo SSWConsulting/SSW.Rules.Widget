@@ -23,6 +23,7 @@ class Widget extends React.Component {
       author: props.author,
       numberOfRules: props.numberOfRules > 0 ? props.numberOfRules : 10,
       token: props.token,
+      insightsToken: props.insightsToken,
       location: null|| props.location,
     };
   }
@@ -139,6 +140,7 @@ Widget.propTypes = {
   showLogo: PropTypes.bool,
   numberOfRules: PropTypes.number.isRequired,
   token: PropTypes.string.isRequired,
+  insightsToken: PropTypes.string.isRequired,
   location: PropTypes.object
 };
 

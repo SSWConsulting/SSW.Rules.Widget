@@ -1,17 +1,8 @@
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
-
 const githubOwner = "SSWConsulting";
 const githubRepo = "SSW.Rules.Content";
 const apiBaseUrl = "https://api.github.com/graphql";
-const appInsights = new ApplicationInsights({
-    config: {
-      instrumentationKey: process.env.SSWRULESWIDGET_APPINSIGHTS_INSTRUMENTATIONKEY,
-    },
-});
 
-appInsights.loadAppInsights();
-
-export async function requestPullRequests(numberOfRules, author, token) {
+export async function requestPullRequests(numberOfRules, author, token, appInsights) {
   const res = await fetch(apiBaseUrl, {
     method: "POST",
     headers: {
@@ -50,9 +41,8 @@ export async function requestPullRequests(numberOfRules, author, token) {
   return data.search.nodes;
 }
 
-export async function requestMultipleFileContents(list, numberOfRules, token) {
+export async function requestMultipleFileContents(list, numberOfRules, token, appInsights) {
   let promises = [];
-
   for (let i = 0; i < numberOfRules; i++) {
     promises.push(
       fetch(apiBaseUrl, {
@@ -76,26 +66,24 @@ export async function requestMultipleFileContents(list, numberOfRules, token) {
   }
 
   let contents = [];
-  let returnedPromises = await Promise.all(promises);
-
-  for (let res of returnedPromises) {
-    if (!res.ok) {
-      appInsights && appInsights.trackException({
-        exception: new Error(`[ERROR] ${res.status} - ${res.statusText}`),
-      });
-    }
-  }
-
-  let returnedObjects = await Promise.all(returnedPromises.map((res) => res.json()));
-
-  for (let obj of returnedObjects) {
-    contents = [...contents, obj.data.repository.object.text];
-  }
+  await Promise.all(promises)
+    .then((returnedPromises) => Promise.all(returnedPromises.map((res) => res.json())))
+    .then((returnedObjects) => {
+      for (let obj of returnedObjects) {
+        contents = [...contents, obj.data.repository.object.text];
+      }
+    })
+    .catch((error) => { 
+        appInsights && appInsights.trackException({
+          exception: new Error(`[ERROR] ${error.status} - ${error.statusText}`),
+        });
+        return error 
+    });
 
   return contents;
 }
 
-export async function requestSingleFileContents(file, token) {
+export async function requestSingleFileContents(file, token, appInsights) {
   const res = await fetch(apiBaseUrl, {
     method: "POST",
     headers: {
@@ -116,7 +104,7 @@ export async function requestSingleFileContents(file, token) {
 		}`,
     }),
   });
-  
+
   if (!res.ok) {
     appInsights && appInsights.trackException({
       exception: new Error(`[ERROR] ${res.status} - ${res.statusText}`),
@@ -125,9 +113,7 @@ export async function requestSingleFileContents(file, token) {
 
   const { data } = await res.json();
 
-  const responseObject = data.repository.object;
-
-  if (!responseObject) {
+  if (!data.repository.object) {
     return null;
   }
 
