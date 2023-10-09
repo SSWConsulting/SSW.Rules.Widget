@@ -22,7 +22,8 @@ class Widget extends React.Component {
       isDarkMode: props.isDarkMode,
       author: props.author,
       numberOfRules: props.numberOfRules > 0 ? props.numberOfRules : 10,
-      token: props.token,
+      githubToken: props.githubToken,
+      appInsightsToken: props.appInsightsToken,
       location: null|| props.location,
     };
   }
@@ -138,7 +139,8 @@ Widget.propTypes = {
   isDarkMode: PropTypes.bool,
   showLogo: PropTypes.bool,
   numberOfRules: PropTypes.number.isRequired,
-  token: PropTypes.string.isRequired,
+  githubToken: PropTypes.string.isRequired,
+  appInsightsToken: PropTypes.string.isRequired,
   location: PropTypes.object
 };
 

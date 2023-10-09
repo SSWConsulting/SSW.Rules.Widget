@@ -2,8 +2,8 @@ const githubOwner = "SSWConsulting";
 const githubRepo = "SSW.Rules.Content";
 const apiBaseUrl = "https://api.github.com/graphql";
 
-export async function requestPullRequests(numberOfRules, author, token) {
-  var response = await fetch(apiBaseUrl, {
+export async function requestPullRequests(numberOfRules, author, token, appInsights) {
+  const res = await fetch(apiBaseUrl, {
     method: "POST",
     headers: {
       Authorization: `bearer ${token}`,
@@ -28,51 +28,67 @@ export async function requestPullRequests(numberOfRules, author, token) {
 			}
 		}`,
     }),
-  })
-    .then((res) => res.json())
-    .catch((error) => { return error });
+  });
 
-  return response.data.search.nodes;
-}
-
-export async function requestMultipleFileContents(list, numberOfRules, token) {
-  var promises = [];
-  for (var i = 0; i < numberOfRules; i++) {
-    promises.push(
-      fetch(apiBaseUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query: `{
-				repository(name: "${githubRepo}", owner: "${githubOwner}") {
-				object(expression: "main:${list[i].path}") {
-					... on Blob {
-					text
-					}
-				}
-				}
-			}`,
-        }),
-      })
-    );
+  if (!res.ok) {
+    appInsights && appInsights.trackException({
+      exception: new Error(`[ERROR] ${res.status} - ${res.statusText}`),
+    });
   }
 
-  var contents = [];
-  await Promise.all(promises)
-    .then((returnedPromises) => Promise.all(returnedPromises.map((res) => res.json())))
-    .then((returnedObjects) => {
-      for (let obj of returnedObjects) {
-        contents = [...contents, obj.data.repository.object.text];
-      }
-    })
-    .catch((error) => { return error });
-  return contents;
+  const { data } = await res.json();
+
+  return data.search.nodes;
 }
 
-export async function requestSingleFileContents(file, token) {
-  var response = await fetch(apiBaseUrl, {
+export async function requestMultipleFileContents(list, numberOfRules, token, appInsights) {
+  const promises = [];
+
+  for (let i = 0; i < numberOfRules; i++) {
+    const res = await fetch(apiBaseUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: `{
+          repository(name: "${githubRepo}", owner: "${githubOwner}") {
+            object(expression: "main:${list[i].path}") {
+              ... on Blob {
+                text
+              }
+            }
+          }
+        }`,
+      }),
+    });
+
+    if (!res.ok) {
+      appInsights && appInsights.trackException({
+        exception: new Error(`[ERROR] ${res.status} - ${res.statusText}`),
+      });
+    }
+
+    promises.push(res.json());
+  }
+
+  try {
+    const responses = await Promise.all(promises);
+    const contents = responses.map((obj) => obj.data.repository.object.text);
+    return contents;
+  } catch (error) {
+    if (appInsights) {
+      appInsights.trackException({
+        exception: new Error(`[ERROR] ${error.message}`),
+      });
+    }
+    throw error;
+  }
+}
+
+
+export async function requestSingleFileContents(file, token, appInsights) {
+  const res = await fetch(apiBaseUrl, {
     method: "POST",
     headers: {
       Authorization: `bearer ${token}`,
@@ -91,13 +107,19 @@ export async function requestSingleFileContents(file, token) {
 		}
 		}`,
     }),
-  })
-    .then((res) => res.json())
-    .catch((error) => { return error });
+  });
 
-  var responseObject = response.data.repository.object;
-  if(responseObject) {
-    return response.data.repository.object.text;
+  if (!res.ok) {
+    appInsights && appInsights.trackException({
+      exception: new Error(`[ERROR] ${res.status} - ${res.statusText}`),
+    });
   }
-  return null;
+
+  const { data } = await res.json();
+
+  if (!data.repository.object) {
+    return null;
+  }
+
+  return data.repository.object.text;
 }

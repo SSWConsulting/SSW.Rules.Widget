@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { formatDistanceStrict } from "date-fns";
 import { getRules } from "./business";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
@@ -13,15 +14,28 @@ export default function RulesWidget({
     location = window.location.href,
     ruleCount = 10,
     ruleEditor,
-    token,
+    githubToken,
+    appInsightsToken,
     isDarkMode = false
 }){
+    let appInsights = null;
+
+    if (appInsightsToken) {
+        appInsights = new ApplicationInsights({
+            config: {
+              instrumentationKey: appInsightsToken,
+            },
+        });
+
+        appInsights.loadAppInsights();
+    }
+
     const sswUrl = "https://www.ssw.com.au";
 
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
-    
+
     useEffect(() =>{
         async function fetchData(){
             try {
@@ -32,7 +46,8 @@ export default function RulesWidget({
                     widgetData = await filterData(json)
                 } else {
                     const stateObj = {
-                        token,
+                        githubToken,
+                        appInsights,
                         numberOfRules: ruleCount
                     }
                     const arrayOfRules = await getRules(stateObj)
@@ -74,7 +89,7 @@ export default function RulesWidget({
         }
 
         fetchData();
-    }, [rulesUrl, ruleCount, ruleEditor, token])
+    }, [rulesUrl, ruleCount, ruleEditor, githubToken])
 
     function getLastUpdatedTime(lastUpdatedDate){
         return formatDistanceStrict(
