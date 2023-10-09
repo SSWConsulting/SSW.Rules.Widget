@@ -38,8 +38,8 @@ read:gpg_key
 See [SSW Rules - Do you store your secrets securely?](https://www.ssw.com.au/rules/store-your-secrets-securely/)
 
 ### Application Insights
-The SSW Rules Widget requires application insights. Provide one to the `RulesWidget`
-via the `appInsightsToken` parameter.
+The SSW Rules Widget supports application insights. Provide an app insights token 
+to the `RulesWidget` via the `appInsightsToken` parameter.
 
 ### Examples
 ```javascript
