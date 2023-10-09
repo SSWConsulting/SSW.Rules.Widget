@@ -42,46 +42,50 @@ export async function requestPullRequests(numberOfRules, author, token, appInsig
 }
 
 export async function requestMultipleFileContents(list, numberOfRules, token, appInsights) {
-  let promises = [];
-  for (let i = 0; i < numberOfRules; i++) {
-    promises.push(
-      fetch(apiBaseUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query: `{
-				repository(name: "${githubRepo}", owner: "${githubOwner}") {
-				object(expression: "main:${list[i].path}") {
-					... on Blob {
-					text
-					}
-				}
-				}
-			}`,
-        }),
-      })
-    );
-  }
+  const promises = [];
 
-  let contents = [];
-  await Promise.all(promises)
-    .then((returnedPromises) => Promise.all(returnedPromises.map((res) => res.json())))
-    .then((returnedObjects) => {
-      for (let obj of returnedObjects) {
-        contents = [...contents, obj.data.repository.object.text];
-      }
-    })
-    .catch((error) => { 
-        appInsights && appInsights.trackException({
-          exception: new Error(`[ERROR] ${error.status} - ${error.statusText}`),
-        });
-        return error 
+  for (let i = 0; i < numberOfRules; i++) {
+    const res = await fetch(apiBaseUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: `{
+          repository(name: "${githubRepo}", owner: "${githubOwner}") {
+            object(expression: "main:${list[i].path}") {
+              ... on Blob {
+                text
+              }
+            }
+          }
+        }`,
+      }),
     });
 
-  return contents;
+    if (!res.ok) {
+      appInsights && appInsights.trackException({
+        exception: new Error(`[ERROR] ${res.status} - ${res.statusText}`),
+      });
+    }
+
+    promises.push(res.json());
+  }
+
+  try {
+    const responses = await Promise.all(promises);
+    const contents = responses.map((obj) => obj.data.repository.object.text);
+    return contents;
+  } catch (error) {
+    if (appInsights) {
+      appInsights.trackException({
+        exception: new Error(`[ERROR] ${error.message}`),
+      });
+    }
+    throw error;
+  }
 }
+
 
 export async function requestSingleFileContents(file, token, appInsights) {
   const res = await fetch(apiBaseUrl, {
