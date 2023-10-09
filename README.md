@@ -39,7 +39,7 @@ See [SSW Rules - Do you store your secrets securely?](https://www.ssw.com.au/rul
 
 ### Application Insights
 The SSW Rules Widget requires application insights. Provide one to the `RulesWidget`
-via the `insightsToken` parameter.
+via the `appInsightsToken` parameter.
 
 ### Examples
 ```javascript
@@ -49,10 +49,10 @@ function ExamplePage() {
   return (
     <>
       /* Simplest implementation */
-      <RulesWidget token={tokenVariable} insightsToken={insightsTokenVariable} />
+      <RulesWidget githubToken={tokenVariable} />
 
       /* Using all the options */
-      <RulesWidget token={tokenVariable} insightsToken={insightsTokenVariable} isDarkMode={true} numberOfRules={5} author={authorGitHubUsername} location={window.location}/>
+      <RulesWidget githubToken={tokenVariable} appInsightsToken={insightsTokenVariable} isDarkMode={true} numberOfRules={5} author={authorGitHubUsername} location={window.location}/>
     </>
   );
 }
@@ -61,8 +61,8 @@ function ExamplePage() {
 ### Props
 | Name | Type | Default | Required | Use |
 |:---:|:---:|:---:|:---:|:---:|
-| token | string | null | Yes | GitHub personal access token used to retrieve data. |
-| insightsToken | string | null | Yes | Application Insights token used to send logs and insights. |
+| githubToken | string | null | Yes | GitHub personal access token used to retrieve data. |
+| appInsightsToken | string | null | No | Application Insights token used to send logs and insights. |
 | isDarkMode | boolean | null | No | Determines whether to show the widget in dark mode. When left blank, displays theme matching browser preferences, or light mode by default.  |
 | numberOfRules | int | 10 | No | Number of rules to display in the widget. Must be a positive integer, or default will be used. |
 | author | string | null | No | GitHub username of author to filter by. When set, the widget will show the most recent rules updated by the specified user. When left blank, the widget will show the most recent results for all rules. |

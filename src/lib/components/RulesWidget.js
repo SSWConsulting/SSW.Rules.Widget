@@ -14,17 +14,21 @@ export default function RulesWidget({
     location = window.location.href,
     ruleCount = 10,
     ruleEditor,
-    token,
-    insightsToken,
+    githubToken,
+    appInsightsToken,
     isDarkMode = false
 }){
-    const appInsights = new ApplicationInsights({
-        config: {
-          instrumentationKey: insightsToken,
-        },
-    });
+    let appInsights = null;
 
-    appInsights.loadAppInsights();
+    if (appInsightsToken) {
+        appInsights = new ApplicationInsights({
+            config: {
+              instrumentationKey: appInsightsToken,
+            },
+        });
+
+        appInsights.loadAppInsights();
+    }
 
     const sswUrl = "https://www.ssw.com.au";
 
@@ -42,7 +46,7 @@ export default function RulesWidget({
                     widgetData = await filterData(json)
                 } else {
                     const stateObj = {
-                        token,
+                        githubToken,
                         appInsights,
                         numberOfRules: ruleCount
                     }
@@ -85,7 +89,7 @@ export default function RulesWidget({
         }
 
         fetchData();
-    }, [rulesUrl, ruleCount, ruleEditor, token])
+    }, [rulesUrl, ruleCount, ruleEditor, githubToken])
 
     function getLastUpdatedTime(lastUpdatedDate){
         return formatDistanceStrict(

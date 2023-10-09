@@ -4,8 +4,7 @@ function App() {
   return (
     <div className="App">
       <RulesWidget 
-        token={process.env.REACT_APP_GITHUB_API_PAT} 
-        insightsToken={process.env.REACT_APP_APPINSIGHTS_INSTRUMENTATIONKEY} 
+        githubToken={process.env.REACT_APP_GITHUB_API_PAT} 
       />
     </div>
   );
