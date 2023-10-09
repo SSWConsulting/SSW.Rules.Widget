@@ -131,5 +131,5 @@ export async function requestSingleFileContents(file, token) {
     return null;
   }
 
-  return response.data.repository.object.text;
+  return data.repository.object.text;
 }
