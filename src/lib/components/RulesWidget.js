@@ -18,17 +18,13 @@ export default function RulesWidget({
     appInsightsToken,
     isDarkMode = false
 }){
-    let appInsights = null;
+    const appInsights = new ApplicationInsights({
+        config: {
+          instrumentationKey: appInsightsToken || "",
+        },
+    });
 
-    if (appInsightsToken) {
-        appInsights = new ApplicationInsights({
-            config: {
-              instrumentationKey: appInsightsToken,
-            },
-        });
-
-        appInsights.loadAppInsights();
-    }
+    appInsights.loadAppInsights();
 
     const sswUrl = "https://www.ssw.com.au";
 
