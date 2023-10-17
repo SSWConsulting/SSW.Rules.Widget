@@ -20,7 +20,7 @@ export default function RulesWidget({
 }){
     const appInsights = new ApplicationInsights({
         config: {
-          instrumentationKey: appInsightsToken,
+          instrumentationKey: appInsightsToken || "",
         },
     });
 
