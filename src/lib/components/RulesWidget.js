@@ -131,7 +131,7 @@ export default function RulesWidget({
                 {
                     ruleEditor && !!data.length && (
                     <div className="see-more-container">
-                        <a rel="noreferrer" target="_blank" className="rw-see-more" href={`${userRulesUrl}${ruleEditor}`}>See More</a>
+                        <a rel="noreferrer" target="_blank" className="rw-see-more" href={`${userRulesUrl}${ruleEditor}`}>See more</a>
                     </div>
                     )
                 }
