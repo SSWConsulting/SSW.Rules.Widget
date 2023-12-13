@@ -1,4 +1,36 @@
+# React + TypeScript + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+
+- Configure the top-level `parserOptions` property like this:
+
+```js
+export default {
+  // other rules...
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    project: ['./tsconfig.json', './tsconfig.node.json'],
+    tsconfigRootDir: __dirname,
+  },
+}
+```
+
+- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
+- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+
 # SSW.Rules.Widget
+
 A Widget to display recent rules from SSW Rules
 
 This is a React component, published as an NPM package to be installed on other sites. It retrieves data from [SSW.Rules.Content](https://www.github.com/SSWConsulting/SSW.Rules.Content) and displays the most recently updated rules.
@@ -6,22 +38,27 @@ This is a React component, published as an NPM package to be installed on other 
 ## NPM Package
 
 ### Installation
+
 ```console
 npm i ssw.rules.widget
 ```
 
 ### Usage
+
 ```javascript
 import { Widget } from 'ssw.rules.widget';
 ```
 
 ### Personal Access Token
+
 The SSW Rules Widget requires a GitHub personal access token to retrieve the data.
-1. Login at https://www.github.com/
+
+1. Login at <https://www.github.com/>
 2. Click the profile image in the top right corner and select Settings
 3. Select Developer settings | Personal access tokens | Generate new token
 4. Enter your password to confirm access
 5. Set your new token with the following permissions:
+
 ```
 user
 public_repo
@@ -33,15 +70,18 @@ read:org
 read:public_key
 read:gpg_key
 ```
+
 6. Click 'Generate token' and copy your new personal access token
-7. Store your personal access token somewhere secure in your app for use in the SSW Rules Widget.   
+7. Store your personal access token somewhere secure in your app for use in the SSW Rules Widget.
 See [SSW Rules - Do you store your secrets securely?](https://www.ssw.com.au/rules/store-your-secrets-securely/)
 
 ### Application Insights
-The SSW Rules Widget supports application insights. Provide an app insights token 
+
+The SSW Rules Widget supports application insights. Provide an app insights token
 to the `RulesWidget` via the `appInsightsToken` parameter.
 
 ### Examples
+
 ```javascript
 import { Widget } from 'ssw.rules.widget';
 
@@ -59,6 +99,7 @@ function ExamplePage() {
 ```
 
 ### Props
+
 | Name | Type | Default | Required | Use |
 |:---:|:---:|:---:|:---:|:---:|
 | githubToken | string | null | Yes | GitHub personal access token used to retrieve data. |
