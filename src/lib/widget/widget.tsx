@@ -10,9 +10,8 @@ type WidgetProps = {
   showLogo?: boolean;
   location?: string;
   skip?: number;
-  ruleCount?: number;
-  isDarkMode?: boolean;
-  ruleEditor?: string;
+  numberOfRules?: number;
+  author?: string;
 };
 
 export interface LatestRules {
@@ -31,13 +30,12 @@ export interface LatestRules {
 
 const Widget = ({
   rulesUrl = "https://www.ssw.com.au/rules",
-  userRulesUrl = "https://ssw.com.au/rules/user-rules/?author=",
+  userRulesUrl = "https://www.ssw.com.au/rules/user/?author=",
   showLogo,
   location = window.location.href,
   skip = 0,
-  ruleCount = 10,
-  isDarkMode = false,
-  ruleEditor,
+  numberOfRules = 10,
+  author,
 }: WidgetProps) => {
   const sswUrl = "https://www.ssw.com.au";
 
@@ -51,8 +49,8 @@ const Widget = ({
     "latest-rules",
     async () => {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}?skip=${skip}&take=${ruleCount}${
-          ruleEditor ? `&githubUsername=${ruleEditor}` : ""
+        `${import.meta.env.VITE_API_URL}?skip=${skip}&take=${numberOfRules}${
+          author ? `&githubUsername=${author}` : ""
         }`
       );
       if (!response.ok) {
@@ -67,8 +65,8 @@ const Widget = ({
   console.log(location);
 
   function getContent() {
-    if (isLoading) return <p>Loading...</p>;
-    else if (error) return <p>There was an error: {error.toString()}</p>;
+    if (isLoading) return <p className="rw-title">Loading...</p>;
+    else if (error) return <p className="rw-title">No Rules Found</p>;
     else if (data) {
       return (
         <>
@@ -89,13 +87,13 @@ const Widget = ({
               </a>
             );
           })}
-          {ruleEditor ? (
+          {author ? (
             <div className="see-more-container">
               <a
                 rel="noreferrer"
                 target="_blank"
                 className="rw-see-more"
-                href={`${userRulesUrl}${ruleEditor}`}
+                href={`${userRulesUrl}${author}`}
               >
                 See more
               </a>
@@ -126,9 +124,7 @@ const Widget = ({
           )}
         </h4>
       </div>
-      <div className={`rw-rules-container ${isDarkMode ? "rw-dark" : ""}`}>
-        {getContent()}
-      </div>
+      <div className={`rw-rules-container`}>{getContent()}</div>
     </div>
   );
 };

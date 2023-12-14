@@ -12,7 +12,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="App">
-        <RulesWidget />
+        <RulesWidget
+          skip={10}
+          numberOfRules={5}
+          author={"githubusername"}
+          userRulesUrl="#?="
+          showLogo={true}
+        />
       </div>
     </QueryClientProvider>
   );
