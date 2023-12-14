@@ -2,7 +2,7 @@
   "name": "ssw.rules.widget",
   "description": "A Widget to display recent rules from SSW Rules",
   "author": "SSW Consulting",
-  "private": true,
+  "private": false,
   "keywords": [
     "ssw",
     "rules",
