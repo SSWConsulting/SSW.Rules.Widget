@@ -1,1 +1,1 @@
-export { default as RulesWidget } from './widget/widget';
+export { default as RulesWidget } from "./widget/WidgetWrapper";

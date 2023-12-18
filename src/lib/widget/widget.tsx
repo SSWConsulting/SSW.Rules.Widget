@@ -4,7 +4,7 @@ import { FaClock } from "react-icons/fa";
 import { formatDistanceStrict } from "date-fns";
 import "./styles.css";
 
-type WidgetProps = {
+export interface WidgetProps {
   rulesUrl?: string;
   userRulesUrl?: string;
   showLogo?: boolean;
@@ -12,7 +12,8 @@ type WidgetProps = {
   skip?: number;
   numberOfRules?: number;
   author?: string;
-};
+  latestRulesUrl?: string;
+}
 
 export interface LatestRules {
   Id: string;
@@ -29,9 +30,10 @@ export interface LatestRules {
 }
 
 const Widget = ({
+  latestRulesUrl = "https://sswrules-staging-functions.azurewebsites.net/api/GetLatestRules",
   rulesUrl = "https://www.ssw.com.au/rules",
   userRulesUrl = "https://www.ssw.com.au/rules/user/?author=",
-  showLogo,
+  showLogo = false,
   location = window.location.href,
   skip = 0,
   numberOfRules = 10,
@@ -49,7 +51,7 @@ const Widget = ({
     "latest-rules",
     async () => {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}?skip=${skip}&take=${numberOfRules}${
+        `${latestRulesUrl}?skip=${skip}&take=${numberOfRules}${
           author ? `&githubUsername=${author}` : ""
         }`
       );
@@ -61,8 +63,6 @@ const Widget = ({
       return data;
     }
   );
-
-  console.log(location);
 
   function getContent() {
     if (isLoading) return <p className="rw-title">Loading...</p>;
