@@ -22,10 +22,10 @@ function ExamplePage() {
   return (
     <>
       /* Simplest implementation */
-      <RulesWidget githubToken={tokenVariable} />
+      <RulesWidget />
 
       /* Using all the options */
-      <RulesWidget isDarkMode={true} numberOfRules={5} author={authorGitHubUsername} location={window.location}/>
+      <RulesWidget latestRulesUrl={"#"} skip={5} rulesUrl={"#"} userRulesUrl={"#?="} showLogo={true} numberOfRules={5} author={authorGitHubUsername} location={window.location}/>
     </>
   );
 }
