@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import Logo from "../../assets/SSWLogo.png";
 import { FaClock } from "react-icons/fa";
 import { formatDistanceStrict } from "date-fns";
@@ -34,7 +34,7 @@ const Widget = ({
   rulesUrl = "https://www.ssw.com.au/rules",
   userRulesUrl = "https://www.ssw.com.au/rules/user/?author=",
   showLogo = false,
-  location = window.location.href,
+  location,
   skip = 0,
   numberOfRules = 10,
   author,
@@ -47,9 +47,9 @@ const Widget = ({
       .replace("second", "sec");
   }
 
-  const { data, isLoading, error } = useQuery<LatestRules[]>(
-    "latest-rules",
-    async () => {
+  const { data, isLoading, error } = useQuery<LatestRules[]>({
+    queryKey: ["latest-rules"],
+    queryFn: async () => {
       const response = await fetch(
         `${latestRulesUrl}?skip=${skip}&take=${numberOfRules}${
           author ? `&githubUsername=${author}` : ""
@@ -59,8 +59,8 @@ const Widget = ({
         throw new Error("Network response was not ok");
       }
       return await response.json();
-    }
-  );
+    },
+  });
 
   function getContent() {
     if (isLoading) return <p className="rw-title">Loading...</p>;
@@ -79,7 +79,10 @@ const Widget = ({
                 <div className="rw-rule-card">
                   <p className="rw-rule-title">{item.RuleName}</p>
                   <p className="rw-rule-details">
-                    <FaClock /> {getLastUpdatedTime(item.UpdatedAt)} ago
+                    <span className="rw-icon-flex">
+                      <FaClock />
+                    </span>
+                    {getLastUpdatedTime(item.UpdatedAt)} ago
                   </p>
                 </div>
               </a>

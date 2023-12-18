@@ -1,15 +1,21 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), cssInjectedByJsPlugin()],
   build: {
+    minify: true,
+    outDir: "dist",
     lib: {
-      // Specify the entry point for your library
-      entry: 'src/lib/index.ts',
-      // Define the output formats for your library
-      formats: ['es', 'cjs'] as const, // Use const assertion for enum-like values
+      entry: "src/lib/index.ts",
+      name: "ssw.rules.widget",
+      fileName: (format) => `ssw.rules.widget.${format}.js`,
+      formats: ["es", "cjs"],
+    },
+    rollupOptions: {
+      external: ["react"],
     },
   },
-})
+});

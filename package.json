@@ -2,7 +2,6 @@
   "name": "ssw.rules.widget",
   "description": "A Widget to display recent rules from SSW Rules",
   "author": "SSW Consulting",
-  "private": false,
   "keywords": [
     "ssw",
     "rules",
@@ -11,9 +10,9 @@
   ],
   "version": "2.0.0",
   "license": "MIT",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "main": "dist/ssw.rules.widget.cjs.js",
+  "module": "dist/ssw.rules.widget.es.js",
+  "types": "dist/ssw.rules.widget.d.ts",
   "files": [
     "dist",
     "README.md"
@@ -30,15 +29,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.14.1",
     "date-fns": "^2.30.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.12.0",
-    "react-query": "^3.39.3"
+    "style-inject": "^0.3.0",
+    "vite-plugin-css-injected-by-js": "^3.3.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
+    "@types/style-inject": "^0.3.3",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",

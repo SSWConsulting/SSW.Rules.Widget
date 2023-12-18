@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Widget, { WidgetProps } from "./widget";
 
 const WidgetWrapper = (props: WidgetProps) => {
