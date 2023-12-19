@@ -30,7 +30,7 @@ export interface LatestRules {
 }
 
 const Widget = ({
-  latestRulesUrl = "https://sswrules-staging-functions.azurewebsites.net/api/GetLatestRules",
+  latestRulesUrl = "https://sswrules-prod-functions.azurewebsites.net/api/GetLatestRules",
   rulesUrl = "https://www.ssw.com.au/rules",
   userRulesUrl = "https://www.ssw.com.au/rules/user/?author=",
   showLogo = false,
