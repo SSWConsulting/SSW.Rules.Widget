@@ -3,7 +3,6 @@
 ## Required Tools
 
 - Install nodejs via <https://nodejs.org/en/>
-- Install yarn via <https://classic.yarnpkg.com/en/>
 
 Currently built using node v20.9.0 and NPM v10.1.0
 
