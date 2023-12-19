@@ -10,7 +10,6 @@ Currently built using node v20.9.0 and NPM v10.1.0
 
 - Clone the repo from <https://github.com/SSWConsulting/SSW.Rules.Widget>
 - Run `npm install` to install packages
-- Create a GitHub personal access token as per instructions
 - Create a `.env` file with the following variable:
 `VITE_API_URL: <URL to azure func>`
 
@@ -22,6 +21,17 @@ Currently built using node v20.9.0 and NPM v10.1.0
 4. Commit code and push
 5. Raise a PR
 6. Get it merged!
+
+### Linking
+
+#### NPM
+
+1. In `ssw.rules.widget` run `npm link`
+2. Go to the project you want to include the widget and run `npm link ssw.rules.widget`
+
+#### Yarn (v4)
+
+1. Go to the project you want to include the widget into and run `yarn link <path to widget> -A`
 
 ### Publishing to NPM
 
