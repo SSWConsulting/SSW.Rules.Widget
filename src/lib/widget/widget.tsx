@@ -16,21 +16,21 @@ export interface WidgetProps {
 }
 
 export interface LatestRules {
-  Id: string;
-  Discriminator: string;
-  CommitHash: string;
-  RuleUri: string;
-  RuleGuid: string;
-  RuleName: string;
-  CreatedAt: Date;
-  UpdatedAt: Date;
-  CreatedBy: string;
-  UpdatedBy: string;
-  GitHubUsername: string;
+  id: string;
+  discriminator: string;
+  commitHash: string;
+  ruleUri: string;
+  ruleGuid: string;
+  ruleName: string;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string;
+  updatedBy: string;
+  gitHubUsername: string;
 }
 
 const Widget = ({
-  latestRulesUrl = "https://sswrules-staging-functions.azurewebsites.net/api/GetLatestRules",
+  latestRulesUrl = "https://sswrules-prod-functions.azurewebsites.net/api/GetLatestRules",
   rulesUrl = "https://www.ssw.com.au/rules",
   userRulesUrl = "https://www.ssw.com.au/rules/user/?author=",
   showLogo = false,
@@ -71,18 +71,18 @@ const Widget = ({
           {data.map((item, idx) => {
             return (
               <a
-                key={`${item.Id}${idx}`}
+                key={`${item.id}${idx}`}
                 rel="noreferrer"
                 target="_blank"
-                href={`${rulesUrl}/${item.RuleUri}`}
+                href={`${rulesUrl}/${item.ruleUri}`}
               >
                 <div className="rw-rule-card">
-                  <p className="rw-rule-title">{item.RuleName}</p>
+                  <p className="rw-rule-title">{item.ruleName}</p>
                   <p className="rw-rule-details">
                     <span className="rw-icon-flex">
                       <FaClock />
                     </span>
-                    {getLastUpdatedTime(item.UpdatedAt)} ago
+                    {getLastUpdatedTime(item.updatedAt)} ago
                   </p>
                 </div>
               </a>
