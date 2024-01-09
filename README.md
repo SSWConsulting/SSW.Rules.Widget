@@ -16,7 +16,7 @@ npm i ssw.rules.widget
 ### Usage
 
 ```javascript
-import { Widget } from 'ssw.rules.widget';
+import { RulesWidget } from 'ssw.rules.widget';
 
 function ExamplePage() {
   return (
