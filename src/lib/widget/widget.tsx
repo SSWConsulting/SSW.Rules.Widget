@@ -80,7 +80,7 @@ const Widget = ({
                   <p className="rw-rule-title">{item.ruleName}</p>
                   <p className="rw-rule-details">
                     <span className="rw-icon-flex">
-                      <FaClock />
+                      <FaClock size={14} />
                     </span>
                     {getLastUpdatedTime(item.updatedAt)} ago
                   </p>
