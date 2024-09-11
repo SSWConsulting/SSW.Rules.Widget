@@ -5,11 +5,10 @@ import { formatDistanceStrict } from "date-fns";
 import "./styles.css";
 
 const historyJsonUrl = import.meta.env.VITE_HISTORY_JSON_URL;
-const githubApiToken = import.meta.env.VITE_GITHUB_API_PAT;
-const githubOrg = import.meta.env.VITE_GITHUB_ORG;
-const githubRepo = import.meta.env.VITE_GITHUB_REPO;
+const commitsJsonUrl = import.meta.env.VITE_COMMITS_JSON_URL;
 
 export interface WidgetProps {
+  historyJsonUrl?: string;
   rulesUrl?: string;
   userRulesUrl?: string;
   showLogo?: boolean;
@@ -23,18 +22,31 @@ export interface Rule {
   file: string;
   title: string;
   uri: string;
+  isArchived?: boolean;
   lastUpdated: string;
-  lastUpdatedBy: string;
-  lastUpdatedByEmail: string;
-  created: string;
-  createdBy: string;
-  createdByEmail: string;
+  lastUpdatedBy?: string;
+  lastUpdatedByEmail?: string;
+  created?: string;
+  createdBy?: string;
+  createdByEmail?: string;
 }
 
-interface RuleMetadata {
+type FileChanged = {
+  path: string;
   title: string;
   uri: string;
-}
+};
+
+type Commit = {
+  FilesChanged: FileChanged[];
+  CommitTime: string;
+};
+
+type UserCommits = {
+  user: string;
+  authorName: string;
+  commits: Commit[];
+};
 
 const Widget = ({
   rulesUrl = "https://www.ssw.com.au/rules",
@@ -53,83 +65,85 @@ const Widget = ({
       .replace("second", "sec");
   }
 
-  // get title and uri of the rule from the markdown file
-  const fetchRuleMetaData = async (path: string): Promise<RuleMetadata> => {
-    const response = await fetch(
-      `https://api.github.com/repos/${githubOrg}/${githubRepo}/contents/${path}`,
-      {
-        headers: {
-          Authorization: `Bearer ${githubApiToken}`,
-        }
-      }
-    );
-  
-    if (!response.ok) {
-      throw new Error(`GitHub API request failed with status while fetching rule metadata: ${response.status}`);
-    }
-  
-    const data = await response.json();
-    const content = atob(data.content);
-    
-    // Parse title
-    const titleLine = content.split('\n').find((line) => line.startsWith('title:'));
-    const title = titleLine!.substring(7).trim();
-
-
-    // Parse uri
-    const uriLine = content.split('\n').find((line) => line.startsWith('uri:'));
-    const uri = uriLine ? uriLine.substring(4).trim() : '';
-
-    return { title, uri };
-  };
-
-  // get rules from history.json, sort by last updated date and take only the number of rules specified
-  const { data: rulesData, isLoading: rulesLoading, error: rulesError } = useQuery<Rule[]>({
-    queryKey: ["latest-rules"],
+  const { data: historyData, isLoading: historyLoading, error: historyError } = useQuery<Rule[]>({
+    queryKey: ["history"],
     queryFn: async () => {
       const response = await fetch(historyJsonUrl);
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error("Failed to fetch history.json");
       }
-      const fetchedData: Rule[] = await response.json();
-
-      fetchedData.sort((a, b) => {
-        if (a.lastUpdated < b.lastUpdated) return 1;
-        if (a.lastUpdated > b.lastUpdated) return -1;
-        return 0;
-      });
-
-      const paginatedData: Rule[] = fetchedData.slice(skip, numberOfRules);
-
-      return paginatedData;
-    },
+      return await response.json();
+    }
   });
 
-  // set title and uri for each rule
-  const { data: rulesWithTitles, isLoading: titlesLoading, error: titlesError } = useQuery<Rule[]>({
-    queryKey: ["rules-with-titles", rulesData],
+  const { data: commitsData, isLoading: commitsLoading, error: commitsError } = useQuery<UserCommits[]>({
+    enabled: !!author,
+    queryKey: ["commits"],
     queryFn: async () => {
-      if (!rulesData) return [];
-  
-      return Promise.all(
-        rulesData.map(async (rule) => {
-          const metaData: RuleMetadata = await fetchRuleMetaData(rule.file);
-          rule.title = metaData.title;
-          rule.uri = metaData.uri;
-          return rule;
-        })
-      );
-    },
-    enabled: !!rulesData
+      const response = await fetch(commitsJsonUrl);
+      if (!response.ok) {
+        throw new Error("Failed to fetch commits.json");
+      }
+      return await response.json();
+    }
   });
+
+  let latestRules: Rule[] = [];
+
+  // this section is for widget when it is used in Rules page
+  if (!author && historyData) {
+    latestRules = historyData.sort((a, b) => {
+      if (new Date(a.lastUpdated) < new Date(b.lastUpdated)) return 1;
+      if (new Date(a.lastUpdated) > new Date(b.lastUpdated)) return -1;
+      return 0;
+    });
+
+    latestRules = latestRules.filter((rule) => 
+      !rule.isArchived &&
+      rule.uri &&
+      rule.file.indexOf("categories") < 0
+    );
+
+    latestRules = latestRules.slice(skip, numberOfRules);
+  }
+
+  // this section is for widget when it is used People's Profile page
+  if (author && commitsData && historyData) {
+    const fileMap = new Map<string, { commit: Commit; file: FileChanged }>();
+    const userCommits = commitsData.find((user) => user.user === author);
+  
+    if (userCommits) {
+      userCommits.commits.forEach((commit) => {
+        commit.FilesChanged.forEach((file) => {
+          const existingFile = fileMap.get(file.path);
+          if (!existingFile || new Date(commit.CommitTime) > new Date(existingFile.commit.CommitTime)) {
+            fileMap.set(file.path, { commit, file });
+          }
+        });
+      });
+    
+      latestRules = Array.from(fileMap.values()).map(({ file, commit }) => ({
+        file: file.path,
+        title: file.title,
+        uri: file.uri,
+        lastUpdated: commit.CommitTime
+      }));
+
+      latestRules = latestRules.filter((rule) => 
+        historyData.find((historyRule) => historyRule.file === rule.file && !historyRule.isArchived)
+      );
+
+      latestRules = latestRules.slice(skip, numberOfRules);
+    }
+  }
 
   function getContent() {
-    if (rulesLoading || titlesLoading) return <p className="rw-title">Loading...</p>;
-    else if (rulesError || titlesError) return <p className="rw-title">No Rules Found</p>;
-    else if (rulesData && rulesWithTitles) {
+    if (historyLoading || commitsLoading) return <p className="rw-title">Loading...</p>;
+    else if (historyError || commitsError) return <p className="rw-title">No Rules Found</p>;
+    else if (latestRules) {
       return (
         <>
-          {rulesWithTitles.map((item, idx) => {
+          {latestRules.map((item, idx) => {
             return (
               <a
                 key={`${item.file}${idx}`}
