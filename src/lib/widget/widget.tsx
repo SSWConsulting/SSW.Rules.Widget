@@ -8,7 +8,6 @@ const historyJsonUrl = import.meta.env.VITE_HISTORY_JSON_URL;
 const commitsJsonUrl = import.meta.env.VITE_COMMITS_JSON_URL;
 
 export interface WidgetProps {
-  historyJsonUrl?: string;
   rulesUrl?: string;
   userRulesUrl?: string;
   showLogo?: boolean;
