@@ -25,7 +25,7 @@ function ExamplePage() {
       <RulesWidget />
 
       /* Using all the options */
-      <RulesWidget latestRulesUrl={"#"} skip={5} rulesUrl={"#"} userRulesUrl={"#?="} showLogo={true} numberOfRules={5} author={authorGitHubUsername} location={window.location}/>
+      <RulesWidget skip={5} rulesUrl={"#"} userRulesUrl={"#?="} showLogo={true} numberOfRules={5} author={authorGitHubUsername} location={window.location}/>
     </>
   );
 }
