@@ -7,7 +7,7 @@ import "./styles.css";
 const historyJsonUrl = import.meta.env.VITE_HISTORY_JSON_URL;
 const commitsJsonUrl = import.meta.env.VITE_COMMITS_JSON_URL;
 
-export interface WidgetProps {
+interface WidgetProps {
   rulesUrl?: string;
   userRulesUrl?: string;
   showLogo?: boolean;
@@ -30,22 +30,22 @@ export interface Rule {
   createdByEmail?: string;
 }
 
-type FileChanged = {
+interface FileChanged {
   path: string;
   title: string;
   uri: string;
-};
+}
 
-type Commit = {
+interface Commit {
   FilesChanged: FileChanged[];
   CommitTime: string;
-};
+}
 
-type UserCommits = {
+interface UserCommits {
   user: string;
   authorName: string;
   commits: Commit[];
-};
+}
 
 const Widget = ({
   rulesUrl = "https://www.ssw.com.au/rules",
