@@ -7,7 +7,7 @@ import "./styles.css";
 const historyJsonUrl = import.meta.env.VITE_HISTORY_JSON_URL;
 const commitsJsonUrl = import.meta.env.VITE_COMMITS_JSON_URL;
 
-interface WidgetProps {
+export interface WidgetProps {
   rulesUrl?: string;
   userRulesUrl?: string;
   showLogo?: boolean;
