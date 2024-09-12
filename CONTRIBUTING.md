@@ -10,8 +10,11 @@ Currently built using node v20.9.0 and NPM v10.1.0
 
 - Clone the repo from <https://github.com/SSWConsulting/SSW.Rules.Widget>
 - Run `npm install` to install packages
-- Create a `.env` file with the following variable:
-`VITE_API_URL: <URL to azure func>`
+- Create a `.env` file with the following variable, you can add new variables if needed in your changes:
+
+    `VITE_HISTORY_JSON_URL: <URL to history.json>`
+
+    `VITE_COMMITS_JSON_URL: <URL to commits.json>`
 
 ### Development
 
