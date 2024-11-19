@@ -52,7 +52,7 @@ const Widget = ({
   author,
 }: WidgetProps) => {
   const seeMoreUrl = author
-    ? `${WidgetConstants.LatestRulesUrl}${author}`
+    ? `${WidgetConstants.UserRulesUrl}${author}`
     : `${WidgetConstants.LatestRulesUrl}`;
 
   function getLastUpdatedTime(lastUpdatedDate: string) {
