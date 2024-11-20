@@ -5,9 +5,6 @@ import { WidgetConstants } from "./widget-constants.enum";
 import Logo from "../../assets/SSWLogo.png";
 import "./styles.css";
 
-const historyJsonUrl = import.meta.env.VITE_HISTORY_JSON_URL;
-const commitsJsonUrl = import.meta.env.VITE_COMMITS_JSON_URL;
-
 export interface WidgetProps {
   showLogo?: boolean;
   location?: string;
@@ -51,9 +48,21 @@ const Widget = ({
   numberOfRules = 10,
   author,
 }: WidgetProps) => {
+  let rulesUrl = WidgetConstants.ProdRulesUrl;
+  let latestRulesUrl = WidgetConstants.ProdLatestRulesUrl;
+  let historyJsonUrl = import.meta.env.VITE_PROD_HISTORY_JSON_URL;
+  let commitsJsonUrl = import.meta.env.VITE_PROD_COMMITS_JSON_URL;
+
+  if (location === WidgetConstants.StagingRulesUrl) {
+    rulesUrl = WidgetConstants.StagingRulesUrl;
+    latestRulesUrl = WidgetConstants.StagingLatestRulesUrl;
+    historyJsonUrl = import.meta.env.VITE_STAGING_HISTORY_JSON_URL;
+    commitsJsonUrl = import.meta.env.VITE_STAGING_COMMITS_JSON_URL;
+  }
+
   const seeMoreUrl = author
     ? `${WidgetConstants.UserRulesUrl}${author}`
-    : `${WidgetConstants.LatestRulesUrl}`;
+    : `${latestRulesUrl}`;
 
   function getLastUpdatedTime(lastUpdatedDate: string) {
     return formatDistanceStrict(new Date(lastUpdatedDate), new Date())
@@ -161,7 +170,7 @@ const Widget = ({
                 key={`${item.file}${idx}`}
                 rel="noreferrer"
                 target="_blank"
-                href={`${WidgetConstants.RulesUrl}/${item.uri}`}
+                href={`${rulesUrl}/${item.uri}`}
               >
                 <div className="rw-rule-card">
                   <p className="rw-rule-title">{item.title}</p>
@@ -201,13 +210,14 @@ const Widget = ({
           ""
         )}
         <h4>
-          {location === WidgetConstants.RulesUrl ? (
+          {location === WidgetConstants.ProdRulesUrl ||
+          location === WidgetConstants.StagingRulesUrl ? (
             "Latest Rules"
           ) : (
             <a
               rel="noreferrer"
               target="_blank"
-              href={`${WidgetConstants.LatestRulesUrl}`}
+              href={`${WidgetConstants.ProdLatestRulesUrl}`}
             >
               Latest Rules
             </a>
