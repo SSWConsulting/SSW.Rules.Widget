@@ -10,7 +10,7 @@ Currently built using node v20.9.0 and NPM v10.1.0
 
 - Clone the repo from <https://github.com/SSWConsulting/SSW.Rules.Widget>
 - Run `npm install` to install packages
-- Create a `.env` file with the variables from `.env.template` and replace placeholders with the actual values. If you add new variable, then don't forget to update the `.env.template`.
+- Create a `.env` file using `.env.template` file and replace placeholders with the actual values. If you add new variable, then don't forget to update the `.env.template` file.
 
 ### Development
 
