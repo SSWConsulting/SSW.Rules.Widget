@@ -12,9 +12,13 @@ Currently built using node v20.9.0 and NPM v10.1.0
 - Run `npm install` to install packages
 - Create a `.env` file with the following variable, you can add new variables if needed in your changes:
 
-    `VITE_HISTORY_JSON_URL: <URL to history.json>`
+    `VITE_PROD_HISTORY_JSON_URL: <URL to production history.json>`
 
-    `VITE_COMMITS_JSON_URL: <URL to commits.json>`
+    `VITE_PROD_COMMITS_JSON_URL: <URL to production commits.json>`
+
+    `VITE_STAGING_HISTORY_JSON_URL: <URL to staging history.json>`
+
+    `VITE_STAGING_COMMITS_JSON_URL: <URL to staging commits.json>`
 
 ### Development
 
