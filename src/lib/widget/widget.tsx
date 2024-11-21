@@ -53,7 +53,10 @@ const Widget = ({
   let historyJsonUrl = import.meta.env.VITE_PROD_HISTORY_JSON_URL;
   let commitsJsonUrl = import.meta.env.VITE_PROD_COMMITS_JSON_URL;
 
-  if (location === WidgetConstants.StagingRulesUrl) {
+  if (
+    location === WidgetConstants.StagingRulesUrl ||
+    location === WidgetConstants.StagingPeopleUrl
+  ) {
     rulesUrl = WidgetConstants.StagingRulesUrl;
     latestRulesUrl = WidgetConstants.StagingLatestRulesUrl;
     historyJsonUrl = import.meta.env.VITE_STAGING_HISTORY_JSON_URL;
@@ -214,11 +217,7 @@ const Widget = ({
           location === WidgetConstants.StagingRulesUrl ? (
             "Latest Rules"
           ) : (
-            <a
-              rel="noreferrer"
-              target="_blank"
-              href={`${WidgetConstants.ProdLatestRulesUrl}`}
-            >
+            <a rel="noreferrer" target="_blank" href={`${latestRulesUrl}`}>
               Latest Rules
             </a>
           )}
