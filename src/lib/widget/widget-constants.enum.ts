@@ -5,4 +5,6 @@ export enum WidgetConstants {
   ProdLatestRulesUrl = "https://www.ssw.com.au/rules/latest-rules/?size=50",
   StagingLatestRulesUrl = "https://sarulesstagbbfslamgwndh2.z8.web.core.windows.net/rules/latest-rules/?size=50",
   UserRulesUrl = "https://www.ssw.com.au/rules/user/?author=",
+  ProdPeopleUrl = "https://www.ssw.com.au/people",
+  StagingPeopleUrl = "https://sapeoplestagjthgmptzb46i.z8.web.core.windows.net/people",
 }
