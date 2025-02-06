@@ -218,7 +218,7 @@ const Widget = ({
             "Latest Rules"
           ) : (
             <a rel="noreferrer" target="_blank" href={`${latestRulesUrl}`}>
-              Latest Rules
+              Rules Contributions
             </a>
           )}
         </h4>
